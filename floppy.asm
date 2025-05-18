@@ -6,7 +6,7 @@
 	; Вектор-06ц БЛК+СБР!
 	;
 
-LOGOY           .equ $d0
+LOGOY           .equ $d8
 ;LOGOY           .equ $60
 
 NBOUNDS         .equ 7
@@ -67,13 +67,45 @@ DEG90           .equ 256/4
         lxi d, harzakc1
         call varblit
         
-        
+
+messages:
+        lxi h, msg1
+messages_lup:
+        mov a, m
+        ora a
+        jz messages_done
+        mov e, a
+        inx h
+        mov d, m
+        inx h
+        push h
+          xchg
+          call gotoxy
+        pop h
+        call puts
+        lhld _puts_sptr
+        inx h
+        jmp messages_lup
+messages_done:        
 
 forevs:
         ;call clrscr
         call oneframe
         ;jmp $
         jmp forevs
+
+TOPLINE .equ $a0
+LINEH   .equ 14
+msg1:   .db TOPLINE -  0, 4, "KARTOTEKA FOR VECTOR-06C", 0
+msg2:   .db TOPLINE - 10, 4, "------------------------", 0
+msg3:   .db TOPLINE - 30, 4, "HTTPS://CAGLRC.CC/SCALAR", 0
+msg6:   .db TOPLINE - 80, 6, "GIGAZ OF V06C WAREZ", 0
+msg4:   .db TOPLINE - 80 - LINEH, 5, "GAMEZ, DEMOS AND DOCS", 0
+msg5:   .db TOPLINE - 80 - (LINEH*2), 6, "NEW AND HISTORICAL", 0
+msg7:   .db 20, 2, "BBSTRO BY SVOFSKI & IVAGOR", 0
+msg8:   .db 10, 13, "2025", 0
+        .db 0
+
 
                 ; вывод спрайта в формате varblit:
                 ; db first_column, jump offset = (16 - end) * 5, data
@@ -252,7 +284,7 @@ setpixel_bp     .equ $+1
                 mov m, a
                 ret
 
-		.org 300h
+		.org 400h
 PixelMask:
 		.db 10000000b
 		.db 01000000b
@@ -1908,6 +1940,8 @@ MULTAB: .ds 1024
         ; big logo
         .include "blksbr.inc"
 
+
+        .include "font8x8.inc"
 
         .org PLAYER_BASE-1
 	.db 0
