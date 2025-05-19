@@ -6,6 +6,9 @@
 	; Вектор-06ц БЛК+СБР!
 	;
 
+;#define FADE_IN
+#define FADE_OUT
+
 LOGOY           .equ $d8
 ;LOGOY           .equ $60
 
@@ -51,6 +54,16 @@ DEG90           .equ 256/4
         ; clear all bounds arrays
         lxi h, bounds_end
         mvi a, 4 * 256 * NBOUNDS / 32   
+        lxi b, $ffff ; fill with ff
+        call clear_array_backwards
+
+        lxi h, pal_zero_end
+        mvi a, 1
+#ifdef FADE_IN        
+        lxi b, 0
+#else
+        lxi b, $ffff
+#endif
         call clear_array_backwards
         
         
@@ -110,18 +123,27 @@ messages_lup:
         jmp messages_lup
 messages_done:        
 
+        ; this is a momentary fade
+        ;call oneframe
+        ;lxi h, pal_a
+        ;shld pal_a_ptr
+        ;lxi h, pal_b
+        ;shld pal_b_ptr
+
         call oneframe
-        lxi h, pal_a
+
+        ; begin fade in
+        lxi h, pal_fade_a
         shld pal_a_ptr
-        lxi h, pal_b
+        lxi h, pal_fade_b
         shld pal_b_ptr
 
+        mvi a, 8
+        sta fade_in_flag    ; enable fade in for 8 frames (see ISR)
 forevs:
         call oneframe
         jmp forevs
 
-pal_a_ptr:  .dw 0
-pal_b_ptr:  .dw 0
 
 TOPLINE .equ $a0
 LINEH   .equ 14
@@ -684,7 +706,7 @@ clear_array_backwards:
 ;        di
         xchg
         sphl    ; sp = bounds_b + $600
-        lxi b, $ffff ; fill with ff
+;        lxi b, $ffff ; fill with ff
 clrbounds_pushkin:        
         push b \ push b \ push b \ push b       ; 32 bytes
         push b \ push b \ push b \ push b
@@ -1268,6 +1290,10 @@ BLKC    .equ 232q
 WHTC    .equ 377q    
 XXXC    .equ 110q
 
+pal_a_ptr:  .dw 0
+pal_b_ptr:  .dw 0
+
+
 pal_a: ; $e0  
     ;    0    1    2    3    4    5    6    7    8    9    a    b    c    d    e    f
     .db  BLKC,CLRA,BLKC,CLRA,WHTC,WHTC,WHTC,WHTC,XXXC,XXXC,XXXC,XXXC,XXXC,XXXC,XXXC,BLKC
@@ -1282,6 +1308,109 @@ pal_0:
 pal_intro: 
     ;    0    1    2    3    4    5    6    7    8    9    a    b    c    d    e    f
     .db  0,0,0,0,WHTC,WHTC,WHTC,WHTC,0,0,0,0,0,0,0,0
+
+pal_fade_a: .ds 16
+pal_fade_b: .ds 16
+pal_zero_end:
+
+fade_in_flag: .db 0
+do_fade_in:
+        lda fade_in_flag
+        dcr a
+        sta fade_in_flag
+        lxi d, pal_a        ; goal
+        lxi h, pal_fade_a   ; work
+#ifdef FADE_IN
+        call fade_in
+#else
+        call fade_out
+#endif
+        lxi d, pal_b        ; goal
+        lxi h, pal_fade_b   ; work
+#ifdef FADE_IN
+        call fade_in
+#else
+        call fade_out
+#endif
+        ret
+
+#ifdef FADE_IN
+        ; de=goal, hl=work (start with zeroes)
+        ; work < goal (start with 000q)
+fade_in:
+        mvi c, 16
+fade_in_loop:
+        ldax d          ; goal
+        push d
+
+        sub m           ; goal - work (work < goal)
+        mov d, a
+        mvi e, 0
+        ani 007q
+        jz $+5
+        mvi e, 001q
+        mov a, d
+        ani 070q
+        jz $+7
+        mvi a, 010q
+        ora e
+        mov e, a
+        mov a, d
+        ani 300q
+        jz $+7
+        mvi a, 100q
+        ora e
+        mov e, a
+        
+        mov a, m
+        add e
+        mov m, a
+        pop d
+        inx h
+        inx d
+        dcr c
+        jnz fade_in_loop
+        ret
+#endif
+#ifdef FADE_OUT
+        ; de=goal, hl=work (start with 377q)
+        ; work > goal (start with 377q)
+fade_out:
+        mvi c, 16
+        xchg            ; hl=goal, de=work
+fade_out_loop:
+        ldax d          ; work
+        push d
+        sub m           ; work - goal
+        mov d, a
+        mvi b, 0
+        ani 007q
+        jz $+5
+        mvi b, 001q
+        mov a, d
+        ani 070q
+        jz $+7
+        mvi a, 010q
+        ora b
+        mov b, a
+        mov a, d
+        ani 300q
+        jz $+7
+        mvi a, 100q
+        ora b
+        mov b, a
+        pop d
+
+        ldax d
+        sub b
+        stax d
+        inx h
+        inx d
+        dcr c
+        jnz fade_out_loop
+        ret
+#endif
+
     
 ISRstack:
 	.ds 32
@@ -1303,6 +1432,10 @@ ISR:
 	push d
 
         call set_palette_pp
+
+        lda fade_in_flag
+        ora a
+        cnz do_fade_in
 
 
         lhld intcount
