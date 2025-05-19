@@ -26,7 +26,18 @@
 ; xx xx
 ;  xx xxx
 ;.db $7f, $db, $db, $7b, $1b, $1b, $1b, $00, ;; ПЫ
-.db $6e, $d8, $d8, $de, $d8, $d8, $6e, $00
+;.db $6e, $d8, $d8, $de, $d8, $d8, $6e, $00 ; -- OE
+
+
+; xx..xx..
+; xx..xx..
+; xx..xx..
+; xx..xx..
+; xx..xx..
+; xx..xx..
+; xxxxxxx.
+; .....xx.
+.db $cc, $cc, $cc, $cc, $cc, $cc, $fe, $06
 .db $3f, $60, $7c, $66, $66, $3e, $06, $fc,
 .db $00, $00, $00, $00, $7e, $7e, $7e, $00,
 .db $18, $3c, $7e, $18, $7e, $3c, $18, $ff,

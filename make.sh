@@ -7,7 +7,7 @@ ZX0=./tools/zx0.exe
 PNG2DB=./tools/png2db-arzak.py
 
 #ZX0_ORG=4000h
-PLAYER_ORG=4000
+PLAYER_ORG=5000
 
 MAIN=floppy
 ROM=$MAIN-raw.rom

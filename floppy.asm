@@ -9,6 +9,9 @@
 ;#define FADE_IN
 #define FADE_OUT
 
+; show all the text messages before the main screen appears
+;#define MESSAGES_AT_ONCE
+
 LOGOY           .equ $d8
 ;LOGOY           .equ $60
 
@@ -103,11 +106,12 @@ black_loop:
         lxi d, harzakc1
         call varblit
 
+#ifdef MESSAGES_AT_ONCE
 messages:
         lxi h, msg1
 messages_lup:
         mov a, m
-        ora a
+        cpi 255
         jz messages_done
         mov e, a
         inx h
@@ -122,6 +126,16 @@ messages_lup:
         inx h
         jmp messages_lup
 messages_done:        
+#else
+        ; slow messages
+        lxi h, msg1
+        shld slow_msg_ptr
+        lxi h, msg_restart
+        shld slow_msg_loop
+        mvi a, 1
+        sta slowprint_enabled
+        sta slow_msg_state
+#endif
 
         ; this is a momentary fade
         ;call oneframe
@@ -143,21 +157,6 @@ messages_done:
 forevs:
         call oneframe
         jmp forevs
-
-
-TOPLINE .equ $a0
-LINEH   .equ 14
-msg1:   .db TOPLINE -  0, 4, "KARTOTEKA FOR VECTOR-06C", 0
-msg2:   .db TOPLINE - 10, 4, "------------------------", 0
-msg3:   .db TOPLINE - 30, 4, "HTTPS://CAGLRC.CC/SCALAR", 0
-msg6:   .db TOPLINE - 80, 6, "GIGAZ OF V06C WAREZ", 0
-msg4:   .db TOPLINE - 80 - LINEH, 5, "GAMEZ, DEMOS AND DOCS", 0
-msg5:   .db TOPLINE - 80 - (LINEH*2), 6, "NEW AND HISTORICAL", 0
-msg7:   .db 20, 2, "BBSTRO BY SVOFSKI & IVAGOR", 0
-msg8:   .db 10, 13, "2025", 0
-        .db 0
-
-msg_minus1: .db "SVOFSKI & IVAGOR", 0
 
                 ; вывод спрайта в формате varblit:
                 ; db first_column, jump offset = (16 - end) * 5, data
@@ -1411,7 +1410,47 @@ fade_out_loop:
         ret
 #endif
 
-    
+slowprint:
+        lhld slow_msg_ptr
+        lda slow_msg_state
+        ora a
+        jz slop_nextbyte
+        xra a
+        sta slow_msg_state
+        ; y, x
+        mov e, m \ inx h
+        mov d, m \ inx h
+        push h
+        xchg
+        call gotoxy
+        pop h
+slop_nextbyte:
+        mov a, m
+        shld _puts_sptr
+        inx h
+        shld slow_msg_ptr
+        cpi 255
+        jz slop_wraparound
+        ora a
+        jnz slop_char
+        ; 0, next line in group
+        inr a
+        sta slow_msg_state
+        ret ; next time get the coords
+slop_char:
+        jmp _putchar
+slop_wraparound:
+        lhld slow_msg_loop
+        shld slow_msg_ptr
+        mvi a, 1
+        sta slow_msg_state
+        ret
+
+slowprint_enabled:  .db 0
+slow_msg_state: .db 0
+slow_msg_ptr: .dw 0
+slow_msg_loop: .dw 0
+
 ISRstack:
 	.ds 32
 ISRstackEnd:
@@ -1441,37 +1480,14 @@ ISR:
         lhld intcount
         inx h
         shld intcount
-        ; lda frametime
-        ; inr a
-        ; sta frametime
-        
-        ; mov a, h
-        ; rar 
-        ; mov h, a
-        ; mov a, l
-        ; rar 
-        ; mov l, a
-
-        ; mov a, h
-        ; rar 
-        ; mov h, a
-        ; mov a, l
-        ; rar 
-        ; mov l, a
-
-        ; mov a, h
-        ; rar 
-        ; mov h, a
-        ; mov a, l
-        ; rar 
-        ; mov l, a
-
-        ; mov a, l
-        ; sta anim_pos
         
         lda songe_enabled
         ora a
         cnz player_tick               ; play songe from the interrupt
+
+        lda slowprint_enabled
+        ora a
+        cnz slowprint
 
 	pop d
 	pop b
@@ -2097,6 +2113,109 @@ costbl:
         .db $5a,$5c,$5e,$60,$62,$64,$66,$68,$6a,$6b,$6d,$6f,$70,$71,$73,$74,$75,$76,$78,$79,$7a,$7a,$7b,$7c,$7d,$7d,$7e,$7e,$7e,$7f,$7f,$7f
 
 MULTAB: .ds 1024
+
+TOPLINE .equ $a0
+LINEH   .equ 14
+msg1:   
+        .db TOPLINE - 30, 4, "HTTPS://CAGLRC.CC/SCALAR", 0
+        .db 10, 14, "2025", 0
+;                                         "                                "
+msg_restart:
+        .db TOPLINE -  0, 4, "KARTOTEKA FOR VECTOR-06C", 0
+        .db TOPLINE - 10, 4, "------------------------", 0
+        .db TOPLINE - 80, 0,              " VISIT FOR GIGAZ OF V-06C WAREZ ", 0
+        .db TOPLINE - 80 - LINEH, 0,      "      GAMEZ, DEMOS AND DOCS     ", 0
+        .db TOPLINE - 80 - (LINEH*2), 0,  "       RECENT & HISTORICAL      ", 0
+
+        .db TOPLINE - 80 - (LINEH*3), 0,  "                                ", 0
+        
+        .db TOPLINE - 80, 0,              "      COME AND LEARN ABOUT      ", 0
+        .db TOPLINE - 80 - (LINEH*1), 0,  "         -- -- -- -- --         ", 0
+        .db TOPLINE - 80 - (LINEH*3), 0,  "            -- -- --            ", 0
+        .db TOPLINE - 80 - (LINEH*2), 0,  "           VECTOR-06C           ", 0
+
+        .db TOPLINE - 80 - (LINEH*4), 0,  "                                ", 0
+        .db TOPLINE - 80 - (LINEH*4), 0,  "                                ", 0
+
+        .db TOPLINE - 80 - (LINEH*1), 0,  "                                ", 0   ; wipe previous
+        .db TOPLINE - 80 - (LINEH*2), 0,  "                                ", 0
+        .db TOPLINE - 80 - (LINEH*3), 0,  "                                ", 0
+
+        .db TOPLINE - 80, 0,              "  CODE NEW DEMOS AND GAMES FOR  ", 0
+        .db TOPLINE - 80 - (LINEH*1), 0,  "         -- -- -- -- --         ", 0
+        .db TOPLINE - 80 - (LINEH*3), 0,  "            -- -- --            ", 0
+        .db TOPLINE - 80 - (LINEH*2), 0,  "           BEKTOP-06",20,"           ", 0
+
+        .db TOPLINE - 80 - (LINEH*4), 0,  "                                ", 0
+        .db TOPLINE - 80 - (LINEH*4), 0,  "                                ", 0
+
+        .db TOPLINE - 80 - (LINEH*1), 0,  "                                ", 0   ; wipe previous
+        .db TOPLINE - 80 - (LINEH*2), 0,  "                                ", 0
+        .db TOPLINE - 80 - (LINEH*3), 0,  "                                ", 0
+
+        .db TOPLINE -  0, 4, "  KAPTOTEKA BEKTOPA-06",20,"  ", 0
+
+        .db TOPLINE - 80, 0,              "    WRITE MASSIVE TUNES  FOR    ", 0
+        .db TOPLINE - 80 - (LINEH*1), 0,  "          THE AMAZING           ", 0
+        .db TOPLINE - 80 - (LINEH*1), 0,  "         THE INCREDIBLE         ", 0
+        .db TOPLINE - 80 - (LINEH*1), 0,  "       THE SECOND TO NONE       ", 0
+        .db TOPLINE - 80 - (LINEH*3), 0,  "        SOUND GENERATOR         ", 0
+        .db TOPLINE - 80 - (LINEH*2), 0,  "          8253 (VI53)           ", 0
+
+        .db TOPLINE - 80 - (LINEH*4), 0,  "                                ", 0
+        .db TOPLINE - 80 - (LINEH*4), 0,  "                                ", 0
+
+        .db TOPLINE - 80 - (LINEH*1), 0,  "                                ", 0   ; wipe previous
+        .db TOPLINE - 80 - (LINEH*2), 0,  "                                ", 0
+        .db TOPLINE - 80 - (LINEH*3), 0,  "                                ", 0
+
+        .db TOPLINE - 80, 0,              "    WIN OLDSKOOL COMPOS WITH    ", 0
+        .db TOPLINE - 80 - (LINEH*1), 0,  "         -- -- -- -- --         ", 0
+        .db TOPLINE - 80 - (LINEH*3), 0,  "            -- -- --            ", 0
+        .db TOPLINE - 80 - (LINEH*2), 0,  "        BEKTOP-06",20," PRODS        ", 0
+
+        .db TOPLINE - 80 - (LINEH*4), 0,  "                                ", 0
+        .db TOPLINE - 80 - (LINEH*4), 0,  "                                ", 0
+
+        .db TOPLINE - 80 - (LINEH*1), 0,  "                                ", 0   ; wipe previous
+        .db TOPLINE - 80 - (LINEH*2), 0,  "                                ", 0
+        .db TOPLINE - 80 - (LINEH*3), 0,  "                                ", 0
+
+        .db TOPLINE - 80 - (LINEH*3), 0,  "                                ", 0
+        .db TOPLINE - 80,             0,  "             CREDITS            ", 0
+        .db TOPLINE - 80 - (LINEH*2), 0,  " CODE, GFX, MUSIC ..... SVOFSKI ", 0
+        .db TOPLINE - 80 - (LINEH*3), 0,  " MAD CODE & BASS ....... IVAGOR ", 0
+
+        .db TOPLINE - 80 - (LINEH*4), 0,  "                                ", 0
+
+        .db TOPLINE - 80 - (LINEH*1), 0,  "                                ", 0   ; wipe previous
+        .db TOPLINE - 80 - (LINEH*2), 0,  "                                ", 0
+        .db TOPLINE - 80 - (LINEH*3), 0,  "                                ", 0
+        
+        .db TOPLINE - 80 - (LINEH*1), 0,  " ECHOING.MOD VARIATION FOR VI53 ", 0
+        .db TOPLINE - 80 - (LINEH*2), 0,  " BY SVOFSKI FEAT IVAGOR ON BEHS ", 0
+        .db TOPLINE - 80 - (LINEH*3), 0,  "     - OG AUTHOR UNKNOWN -      ", 0
+
+        .db TOPLINE - 80 - (LINEH*4), 0,  "                                ", 0
+
+        .db TOPLINE -  0, 4, "  KPOTOTEKA", 0
+
+        .db TOPLINE - 80 - (LINEH*0), 0,  "                                ", 0
+        .db TOPLINE - 80 - (LINEH*1), 0,  "                                ", 0   ; wipe previous
+        .db TOPLINE - 80 - (LINEH*2), 0,  "                                ", 0
+        .db TOPLINE - 80 - (LINEH*3), 0,  "                                ", 0
+
+        .db TOPLINE - 80 - (LINEH*2), 0,  " . . . . . . . . . . . . . . .  ", 0
+        
+        .db TOPLINE - 80 - (LINEH*0), 0,  "                                ", 0
+        .db TOPLINE - 80 - (LINEH*1), 0,  "                                ", 0   ; wipe previous
+        .db TOPLINE - 80 - (LINEH*2), 0,  "                                ", 0
+        .db TOPLINE - 80 - (LINEH*3), 0,  "                                ", 0
+
+;msg7:   .db 20, 2, "BBSTRO BY SVOFSKI & IVAGOR", 0
+        .db 1, 1, 255
+
+msg_minus1: .db "SVOFSKI & IVAGOR", 0
 
         ; big logo
         .include "blksbr.inc"
