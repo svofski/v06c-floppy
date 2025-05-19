@@ -24,12 +24,40 @@ PixTabB		.equ 7C00h
 DEG90           .equ 256/4
 
         .org $100
+        di
+        xra a
+        out $10
         lxi sp, $100
         mvi a, $c9
         sta $38
+
+        mvi a, $c3
+        sta 0
+        lxi h, $100
+        shld 1
         
         lxi h, pal_0
         shld setpal_select
+        ei
+
+        lxi h, zero_init_end
+        mvi a, (zero_init_end - zero_init_start) / 32
+        lxi b, 0
+        call clear_array_backwards
+        lxi h, ngon_start
+        shld geometry_ptr
+
+        lxi h, bounds_0
+        shld bounds
+        shld bounds1
+        lxi h, bounds_1
+        shld bounds_b
+        shld bounds1_b
+
+        lxi h, bounds_2
+        shld bounds2
+        lxi h, bounds_3
+        shld bounds2_b
         
         lhld songe
         call player_init    ; starts playback immediately
@@ -137,20 +165,13 @@ messages_done:
         sta slow_msg_state
 #endif
 
-        ; this is a momentary fade
-        ;call oneframe
-        ;lxi h, pal_a
-        ;shld pal_a_ptr
-        ;lxi h, pal_b
-        ;shld pal_b_ptr
-
-        call oneframe
-
-        ; begin fade in
+        ; begin fade in -- make sure these pointers are initialised before oneframe()
         lxi h, pal_fade_a
         shld pal_a_ptr
         lxi h, pal_fade_b
         shld pal_b_ptr
+
+        call oneframe
 
         mvi a, 8
         sta fade_in_flag    ; enable fade in for 8 frames (see ISR)
@@ -308,8 +329,6 @@ clrscrl:
         jnz clrscrl
         ret
       
-intcount: .dw 0
-frametime: .db 0 ; interrupts between oneframe
 
 songe_enabled: .db 1
 
@@ -856,12 +875,6 @@ dg_line:
         jmp dg_line
         ;;
 
-;fb_y:           .db 0
-
-;fb_prev:        .db 0
-;fb_state:       .db 0
-;fb_next:        .db 0
-
 ;         ; loop continue without push/pop
 ; fb_bounds_loop_cont:
 ;         lxi b, NBOUNDS
@@ -1289,8 +1302,6 @@ BLKC    .equ 232q
 WHTC    .equ 377q    
 XXXC    .equ 110q
 
-pal_a_ptr:  .dw 0
-pal_b_ptr:  .dw 0
 
 
 pal_a: ; $e0  
@@ -1298,21 +1309,10 @@ pal_a: ; $e0
     .db  BLKC,CLRA,BLKC,CLRA,WHTC,WHTC,WHTC,WHTC,XXXC,XXXC,XXXC,XXXC,XXXC,XXXC,XXXC,BLKC
 pal_b: ; $c0    
     .db  BLKC,BLKC,CLRB,CLRB,WHTC,WHTC,WHTC,WHTC,XXXC,XXXC,XXXC,XXXC,XXXC,XXXC,XXXC,BLKC
-pal_0:
-    .db 0, 0, 0, 0
-    .db 0, 0, 0, 0
-    .db 0, 0, 0, 0
-    .db 0, 0, 0, 0
-
 pal_intro: 
     ;    0    1    2    3    4    5    6    7    8    9    a    b    c    d    e    f
     .db  0,0,0,0,WHTC,WHTC,WHTC,WHTC,0,0,0,0,0,0,0,0
 
-pal_fade_a: .ds 16
-pal_fade_b: .ds 16
-pal_zero_end:
-
-fade_in_flag: .db 0
 do_fade_in:
         lda fade_in_flag
         dcr a
@@ -1446,11 +1446,6 @@ slop_wraparound:
         sta slow_msg_state
         ret
 
-slowprint_enabled:  .db 0
-slow_msg_state: .db 0
-slow_msg_ptr: .dw 0
-slow_msg_loop: .dw 0
-
 ISRstack:
 	.ds 32
 ISRstackEnd:
@@ -1512,7 +1507,7 @@ bounds2:        .dw bounds_2
 bounds2_b:      .dw bounds_3
 
 		.ds 2
-_bss:
+
         ; polygon bounds array
         .org 0100h + $ & 0ff00h  ; ALIGN 256
 bounds_0:
@@ -1955,9 +1950,6 @@ muls8s8shr7neg2:
 		mov d,a
         ret
 
-frame_no:       .db 0
-anim_pos:       .db 0
-
 rotx:   .db 0
 roty:   .db 0
 rotz:   .db 0
@@ -2216,6 +2208,36 @@ msg_restart:
         .db 1, 1, 255
 
 msg_minus1: .db "SVOFSKI & IVAGOR", 0
+
+
+        .org 020h + $ & 0ffc0h  ; ALIGN 32
+zero_init_start:
+
+intcount:   .dw 0
+frametime:  .db 0 ; interrupts between oneframe
+frame_no:   .db 0
+anim_pos:   .db 0
+
+pal_0:
+            .db 0, 0, 0, 0
+            .db 0, 0, 0, 0
+            .db 0, 0, 0, 0
+            .db 0, 0, 0, 0
+pal_a_ptr:  .dw 0
+pal_b_ptr:  .dw 0
+pal_fade_a: .ds 16
+pal_fade_b: .ds 16
+pal_zero_end:
+
+fade_in_flag:       .db 0
+slowprint_enabled:  .db 0
+slow_msg_state:     .db 0
+slow_msg_ptr:       .dw 0
+slow_msg_loop:      .dw 0
+
+        .org 020h + $ & 0ffc0h  ; ALIGN 32
+zero_init_end:
+
 
         ; big logo
         .include "blksbr.inc"
