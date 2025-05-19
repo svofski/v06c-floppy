@@ -22,11 +22,11 @@ DEG90           .equ 256/4
         mvi a, $c9
         sta $38
         
-        call clrscr     ; очистить экран
-        call set_palette_pp; установить палитру
+        lxi h, pal_0
+        shld setpal_select
         
         lhld songe
-        call player_init
+        call player_init    ; starts playback immediately
 
         call clrscr
         di
@@ -48,25 +48,47 @@ DEG90           .equ 256/4
 
         call mathinit
 
-        ; clear both bounds arrays
+        ; clear all bounds arrays
         lxi h, bounds_end
         mvi a, 4 * 256 * NBOUNDS / 32   
         call clear_array_backwards
         
         
-        ; нарисовать большую надпись внизу HARZAKC
+        lxi h, $0860
+        call gotoxy
+        lxi h, msg_minus1
+        call puts
+
+        lxi h, pal_intro
+        shld setpal_select
+
+        mvi a, 240
+black_loop:
+        hlt
+        dcr a
+        jnz black_loop
+
+        lxi h, pal_0
+        shld setpal_select
+        hlt
+        call clrscr
+        hlt
+
+
+        ; main part
+
+        ; нарисовать большую надпись
         mvi c, LOGOY
-        mvi a, $80    ; плоскость c0 (белая)
+        mvi a, $80    ; плоскость $80
         sta varblit_plane
         lxi d, harzakc0
         call varblit
 
         mvi c, LOGOY-1
-        mvi a, $a0    ; плоскость e0 (красная)
+        mvi a, $a0    ; плоскость $a0
         sta varblit_plane
         lxi d, harzakc1
         call varblit
-        
 
 messages:
         lxi h, msg1
@@ -88,11 +110,18 @@ messages_lup:
         jmp messages_lup
 messages_done:        
 
-forevs:
-        ;call clrscr
         call oneframe
-        ;jmp $
+        lxi h, pal_a
+        shld pal_a_ptr
+        lxi h, pal_b
+        shld pal_b_ptr
+
+forevs:
+        call oneframe
         jmp forevs
+
+pal_a_ptr:  .dw 0
+pal_b_ptr:  .dw 0
 
 TOPLINE .equ $a0
 LINEH   .equ 14
@@ -106,6 +135,7 @@ msg7:   .db 20, 2, "BBSTRO BY SVOFSKI & IVAGOR", 0
 msg8:   .db 10, 13, "2025", 0
         .db 0
 
+msg_minus1: .db "SVOFSKI & IVAGOR", 0
 
                 ; вывод спрайта в формате varblit:
                 ; db first_column, jump offset = (16 - end) * 5, data
@@ -584,7 +614,8 @@ next_bounds:
         rar
         jc nb_bbb
         
-        lxi h, pal_a
+        ;lxi h, pal_a
+        lhld pal_a_ptr
         shld setpal_select
 
         lhld bounds
@@ -620,7 +651,8 @@ nb_bbb:
         lhld bounds1_b
         shld bounds_b
         
-        lxi h, pal_b
+        ;lxi h, pal_b
+        lhld pal_b_ptr
         shld setpal_select
 
         mvi a, BUTTPLANE_B
@@ -669,34 +701,21 @@ clrbounds_sp    .equ $+1
         
 
 oneframe:
-        ;hlt \ hlt \ hlt
         call next_bounds
-; oneframe_mike:        
-;         lda frametime
-;         cpi 8
-;         jp oneframe_bob
-;         hlt
-;         jmp oneframe_mike
-; oneframe_bob:
-        ;hlt
         lda frametime
         xra a
         sta frametime
         
-        
         call transform_geometry
-        ;hlt
         call draw_geometry
-        ;hlt
         call fill_bounds
-        ;hlt
         lxi h, frame_no
         inr m
         mov a, m
         sta anim_pos
 
-;for benchmark
-		rnz 
+        ;for benchmark
+        rnz 
 
         ret
                 
@@ -1254,6 +1273,15 @@ pal_a: ; $e0
     .db  BLKC,CLRA,BLKC,CLRA,WHTC,WHTC,WHTC,WHTC,XXXC,XXXC,XXXC,XXXC,XXXC,XXXC,XXXC,BLKC
 pal_b: ; $c0    
     .db  BLKC,BLKC,CLRB,CLRB,WHTC,WHTC,WHTC,WHTC,XXXC,XXXC,XXXC,XXXC,XXXC,XXXC,XXXC,BLKC
+pal_0:
+    .db 0, 0, 0, 0
+    .db 0, 0, 0, 0
+    .db 0, 0, 0, 0
+    .db 0, 0, 0, 0
+
+pal_intro: 
+    ;    0    1    2    3    4    5    6    7    8    9    a    b    c    d    e    f
+    .db  0,0,0,0,WHTC,WHTC,WHTC,WHTC,0,0,0,0,0,0,0,0
     
 ISRstack:
 	.ds 32
