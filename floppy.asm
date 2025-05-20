@@ -1228,35 +1228,6 @@ udiv16248:
 	ret
       
     ; Программирование палитры
-set_palette
-    ei
-    hlt
-
-    mvi a, 88h      ; настроить ППИ
-    out 0
-
-    mvi a, 255      ; сбросить прокрутку
-    out 03
-
-    mvi c, $f       ; программирование палитры
-    mvi b, $00
-_set_palette_1:
-    mov a,c
-    out 2
-    mov a, b
-    out $c
-    out $c
-    xthl
-    xthl
-    out $c
-    out $c
-    ;cma
-    adi 124q
-    mov b, a
-    dcr c
-    jp _set_palette_1
-    ret
-
 set_palette_pp:
     mvi a, $88
     out 0
@@ -1270,15 +1241,16 @@ _setpal_pp_1:
     out 2
     ldax d
     out $c
+	xthl
     out $c
+	xthl
     inx d
-    out $c
-    out $c
-    out $c
     inr c
-    mov a, c
+	nop\ nop
+    out $c
 setpal_top .equ $+1             ; set to 3 to only program first 3 colors
-    cpi $10
+    mvi a,$10
+	cmp c
     jnz _setpal_pp_1
     ret
     
