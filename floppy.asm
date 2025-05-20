@@ -195,9 +195,16 @@ varblit:
                 dad sp
                 shld varblit_sp
                 xchg
+				mov a,c
+				mov c,m
+				inx h
+				mov b,m
+				inx h
                 sphl
         
-                mov l, c
+;                mov l, c
+				mov l,a
+				.db 0FEh	; cpi .. , skip pop b
 vb_L0:                
                 pop b       ; c = first column, b = premultiplied jump offset = (16-end) * 5
                 mov a, b    ; end = 255, 255

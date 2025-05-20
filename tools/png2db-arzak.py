@@ -203,7 +203,7 @@ if mode == 'varblit':
         if hull == None:
             # use single hull
             hull = shrinkwrap(planes[i], ncolumns)
-        print('.ds 2 ; mednonogov padding')
+        # print('.ds 2 ; mednonogov padding')
         if labels[i] != '':
             print(f'{labels[i]}:')        
         varformat(planes[i], ncolumns, hull)
