@@ -13,6 +13,8 @@
 ;#define MESSAGES_AT_ONCE
 
 LOGOY           .equ $d8
+FISH_Y          .equ $60
+FISH_BP         .equ $80
 ;LOGOY           .equ $60
 
 NBOUNDS         .equ 7
@@ -40,12 +42,19 @@ DEG90           .equ 256/4
         shld setpal_select
         ei
 
+        ; clear zero initialized vars
         lxi h, zero_init_end
         mvi a, (zero_init_end - zero_init_start) / 32
         lxi b, 0
         call clear_array_backwards
         lxi h, ngon_start
         shld geometry_ptr
+
+        ;; fish init
+        ;mvi a, $1e      ; fish appears in this column
+        ;sta fish_col
+        ;mvi a, 1
+        ;sta fish_col_frac
 
         lxi h, bounds_0
         shld bounds
@@ -165,6 +174,9 @@ messages_done:
         sta slow_msg_state
 #endif
 
+
+        ; MAIN PART BEGINS
+
         ; begin fade in -- make sure these pointers are initialised before oneframe()
         lxi h, pal_fade_a
         shld pal_a_ptr
@@ -175,6 +187,10 @@ messages_done:
 
         mvi a, 8
         sta fade_in_flag    ; enable fade in for 8 frames (see ISR)
+
+        ;mvi a, 1
+        ;sta fish_enabled
+
 forevs:
         call oneframe
         jmp forevs
@@ -195,16 +211,16 @@ varblit:
                 dad sp
                 shld varblit_sp
                 xchg
-				mov a,c
-				mov c,m
-				inx h
-				mov b,m
-				inx h
+                mov a,c
+                mov c,m
+                inx h
+                mov b,m
+                inx h
                 sphl
         
 ;                mov l, c
-				mov l,a
-				.db 0FEh	; cpi .. , skip pop b
+                mov l,a
+                .db 0FEh	; cpi .. , skip pop b
 vb_L0:                
                 pop b       ; c = first column, b = premultiplied jump offset = (16-end) * 5
                 mov a, b    ; end = 255, 255
@@ -219,7 +235,6 @@ varblit_plane   .equ $+1
                 mov a, b ; b = precalculated offset into vbline_16
                 sta vb_M1+1
 vb_M1:          jmp vbline_16
-vb_L1:
 
                 .org $100 + $ & $ff00
 vbline_16:      pop b \ mov m, c \ inr h \ mov m, b \ inr h
@@ -544,14 +559,14 @@ sbins_k1:
         inx h
         cmp m   ; bounds[i] - x, x < bounds[i] if no carry
         jnc sbins_k2     ; if x >= bounds[k] -> next k
-		mov b,m
-		mov m,a
-		inr b
-		jz after_setbounds				; if 255 == bounds[k] bounds[k] = x, return
+        mov b,m
+        mov m,a
+        inr b
+        jz after_setbounds				; if 255 == bounds[k] bounds[k] = x, return
         ; else insert
-		dcr b
-		inx h\ inx h\ inx h		; hl = &bounds[y][4]
-		mvi a,255
+        dcr b
+        inx h\ inx h\ inx h		; hl = &bounds[y][4]
+        mvi a,255
         
         ; scan empty space before committing to memmove
         ;k = 4 
@@ -559,8 +574,8 @@ sbins_k1:
         cmp m \ jnz insx33 \ dcx h
 ;        cmp m \ jnz insx32
 ;		mov m,b
-		cmp m\ jz after_setbounds_
-		jmp insx32
+        cmp m\ jz after_setbounds_
+        jmp insx32
         
 insx34:        mov a,m \ inx h \ mov m,a \ dcx h \ dcx h ; k = 4, d[k+1] = d[k], k = 3
 insx33:        mov a,m \ inx h \ mov m,a \ dcx h \ dcx h ; k = 3, d[k+1] = d[k], k = 2
@@ -569,30 +584,30 @@ insx32:        mov a,m \ mov m,b\ inx h \ mov m,a ; k = 2, d[k+1] = d[k], k = 1
         
 sbins_k2:        
         inx h
-		cmp m
+        cmp m
         jnc sbins_k3     ; if x >= bounds[k] -> next k
-		mov b,m
-		mov m,a
-		inr b
-		jz after_setbounds		         ; if 255 == bounds[k] bounds[k] = x, return
+        mov b,m
+        mov m,a
+        inr b
+        jz after_setbounds		         ; if 255 == bounds[k] bounds[k] = x, return
         ; else insert
-		dcr b
+        dcr b
         ;k = 2
         inx h                 ; k = 2, d[k+1] = d[k], k = 3
         mov a,m \ mov m,b\ inx h                 ; k = 3, d[k+1] = d[k], k = 4
         mov b,m \ mov m,a\ inx h \ mov m,b                 ; k = 4, d[k+1] = d[k], k = 5
-		jmp after_setbounds
+        jmp after_setbounds
         
 sbins_k3:        
         inx h
-		cmp m
+        cmp m
         jnc sbins_k4     ; if x >= bounds[k] -> next k
-		mov b,m
-		mov m,a
-		inr b
-		jz after_setbounds		         ; if 255 == bounds[k] bounds[k] = x, return
+        mov b,m
+        mov m,a
+        inr b
+        jz after_setbounds		         ; if 255 == bounds[k] bounds[k] = x, return
         ; else insert
-		dcr b
+        dcr b
         ;k = 3
         inx h                 ; k = 3, d[k+1] = d[k], k = 4
         mov a,m \ mov m,b\ inx h \ mov m,a                 ; k = 4, d[k+1] = d[k], k = 5
@@ -601,36 +616,36 @@ sbins_k3:
 
 sbins_k4:
         inx h
-		cmp m
+        cmp m
         jnc sbins_k5     ; if x >= bounds[k] -> next k
-		mov b,m
-		mov m,a
-		inr b
-		jz after_setbounds		         ; if 255 == bounds[k] bounds[k] = x, return
+        mov b,m
+        mov m,a
+        inr b
+        jz after_setbounds		         ; if 255 == bounds[k] bounds[k] = x, return
         ; else insert
-		dcr b
+        dcr b
         ;k = 4 
         inx h \ mov m,b                 ; k = 4, d[k+1] = d[k], k = 5
         jmp after_setbounds
 
 sbins_k5:
         inx h
-		cmp m
-		jnc after_setbounds      ; if x >= bounds[k] -> return
-		mov b,m
+        cmp m
+        jnc after_setbounds      ; if x >= bounds[k] -> return
+        mov b,m
         inr b
         jnz after_setbounds         ; if 255 == bounds[k] bounds[k] = x, return
         mov m, a
 
-		.db 0FEh				;cpi ...
+        .db 0FEh				;cpi ...
 after_setbounds_:
-		mov m,b
+        mov m,b
 after_setbounds:
-		lxi h,line_h
-		dcr m
+	lxi h,line_h
+	dcr m
         pop h
 xinc	.equ $+1
-		lxi b,0
+	lxi b,0
         dad b   ; x += xinc
 line_nexty:
         jnz line_4
@@ -1404,6 +1419,8 @@ slop_nextbyte:
         shld _puts_sptr
         inx h
         shld slow_msg_ptr
+        cpi 254
+        jz launch_fish
         cpi 255
         jz slop_wraparound
         ora a
@@ -1420,6 +1437,17 @@ slop_wraparound:
         mvi a, 1
         sta slow_msg_state
         ret
+launch_fish:
+        mvi a, 1
+        sta slow_msg_state
+        mvi a, $1e      ; fish appears in this column
+        sta fish_col
+        mvi a, 1
+        sta fish_col_frac
+        sta fish_enabled
+        ret
+
+
 
 ISRstack:
 	.ds 32
@@ -1445,6 +1473,10 @@ ISR:
         lda fade_in_flag
         ora a
         cnz do_fade_in
+
+        lda fish_enabled
+        ora a
+        cnz dumbshift
 
 
         lhld intcount
@@ -1858,29 +1890,29 @@ muls8u8shr7pos:
 ;         ret
         
 ;Умножение AHL=A*DE
-MulAHL_A_DE:
-	mvi c,0
-	mov h,d\ mov l,e
-	add a\ jc xxMUL1
-	add a\ jc xxMUL2+2
-	add a\ jc xxMUL3+2
-	add a\ jc xxMUL4+2
-	add a\ jc xxMUL5+2
-	add a\ jc xxMUL6+2
-	add a\ jc xxMUL7+2
-	add a\ rc
-	lxi h,0
-	ret
-
-xxMUL1: dad h\ adc a\ jnc xxMUL2+2
-xxMUL2: dad d\ adc c\ dad h\ adc a\ jnc xxMUL3+2
-xxMUL3: dad d\ adc c\ dad h\ adc a\ jnc xxMUL4+2
-xxMUL4: dad d\ adc c\ dad h\ adc a\ jnc xxMUL5+2
-xxMUL5: dad d\ adc c\ dad h\ adc a\ jnc xxMUL6+2
-xxMUL6: dad d\ adc c\ dad h\ adc a\ jnc xxMUL7+2
-xxMUL7: dad d\ adc c\ dad h\ adc a\ rnc
-xxMUL8: dad d\ adc c
-	ret        
+;MulAHL_A_DE:
+;	mvi c,0
+;	mov h,d\ mov l,e
+;	add a\ jc xxMUL1
+;	add a\ jc xxMUL2+2
+;	add a\ jc xxMUL3+2
+;	add a\ jc xxMUL4+2
+;	add a\ jc xxMUL5+2
+;	add a\ jc xxMUL6+2
+;	add a\ jc xxMUL7+2
+;	add a\ rc
+;	lxi h,0
+;	ret
+;
+;xxMUL1: dad h\ adc a\ jnc xxMUL2+2
+;xxMUL2: dad d\ adc c\ dad h\ adc a\ jnc xxMUL3+2
+;xxMUL3: dad d\ adc c\ dad h\ adc a\ jnc xxMUL4+2
+;xxMUL4: dad d\ adc c\ dad h\ adc a\ jnc xxMUL5+2
+;xxMUL5: dad d\ adc c\ dad h\ adc a\ jnc xxMUL6+2
+;xxMUL6: dad d\ adc c\ dad h\ adc a\ jnc xxMUL7+2
+;xxMUL7: dad d\ adc c\ dad h\ adc a\ rnc
+;xxMUL8: dad d\ adc c
+;	ret        
 
         ; a=d = (d * e) >> 7 signed
 muls8s8shr7:
@@ -2091,9 +2123,10 @@ msg_restart:
         .db TOPLINE -  0, 4, "KARTOTEKA FOR VECTOR-06C", 0
         .db TOPLINE - 10, 4, "------------------------", 0
         .db TOPLINE - 80, 0,              " VISIT FOR GIGAZ OF V-06C WAREZ ", 0
-        .db TOPLINE - 80 - LINEH, 0,      "      GAMEZ, DEMOS AND DOCS     ", 0
+        .db TOPLINE - 80 - LINEH, 0,      "     GAMEZ, DEMOS  AND DOCS     ", 0
         .db TOPLINE - 80 - (LINEH*2), 0,  "       RECENT & HISTORICAL      ", 0
 
+        .db TOPLINE - 80 - (LINEH*3), 0,  "                                ", 0
         .db TOPLINE - 80 - (LINEH*3), 0,  "                                ", 0
         
         .db TOPLINE - 80, 0,              "      COME AND LEARN ABOUT      ", 0
@@ -2109,16 +2142,26 @@ msg_restart:
         .db TOPLINE - 80 - (LINEH*3), 0,  "                                ", 0
 
         .db TOPLINE - 80, 0,              "  CODE NEW DEMOS AND GAMES FOR  ", 0
-        .db TOPLINE - 80 - (LINEH*1), 0,  "         -- -- -- -- --         ", 0
-        .db TOPLINE - 80 - (LINEH*3), 0,  "            -- -- --            ", 0
-        .db TOPLINE - 80 - (LINEH*2), 0,  "           BEKTOP-06",20,"           ", 0
-
+        .db TOPLINE - 80 - (LINEH*1), 0,  "           BEKTOP-06",20,"           ", 0
+        .db TOPLINE - 80 - (LINEH*2), 0,  "   FOR ITS POWERFUL 8080A CPU   ", 0
+        .db TOPLINE - 80 - (LINEH*3), 0,  "    BEAUTIFUL MNEMONICS, TOO    ", 0
         .db TOPLINE - 80 - (LINEH*4), 0,  "                                ", 0
         .db TOPLINE - 80 - (LINEH*4), 0,  "                                ", 0
 
+        .db TOPLINE - 80, 0,              "                                ", 0
         .db TOPLINE - 80 - (LINEH*1), 0,  "                                ", 0   ; wipe previous
         .db TOPLINE - 80 - (LINEH*2), 0,  "                                ", 0
-        .db TOPLINE - 80 - (LINEH*3), 0,  "                                ", 0
+        .db TOPLINE - 80 - (LINEH*4), 0,  "                                ", 0
+
+        .db TOPLINE - 80 + (LINEH*1), 0,  "     XCHG                       ", 0
+        .db TOPLINE - 80 + (LINEH*1), 0,  "                      DAD SP    ", 0
+        .db TOPLINE - 80 + (LINEH*1), 0,  "          XTHL                  ", 0
+        .db TOPLINE - 80 + (LINEH*1), 0,  "        SPHL                    ", 0
+        .db TOPLINE - 80 - (LINEH*3), 0,  "                                ", 0     ; wipe "beautiful mnemonics"
+        .db TOPLINE - 80 + (LINEH*1), 0,  "                                ", 0
+        .db TOPLINE - 80 + (LINEH*1), 0,  "                FHTAGN          ", 0
+        .db TOPLINE - 80 + (LINEH*1), 0,  "                                ", 0
+
 
         .db TOPLINE -  0, 4, "  KAPTOTEKA BEKTOPA-06",20,"  ", 0
 
@@ -2126,8 +2169,10 @@ msg_restart:
         .db TOPLINE - 80 - (LINEH*1), 0,  "          THE AMAZING           ", 0
         .db TOPLINE - 80 - (LINEH*1), 0,  "         THE INCREDIBLE         ", 0
         .db TOPLINE - 80 - (LINEH*1), 0,  "       THE SECOND TO NONE       ", 0
-        .db TOPLINE - 80 - (LINEH*3), 0,  "        SOUND GENERATOR         ", 0
-        .db TOPLINE - 80 - (LINEH*2), 0,  "          8253 (VI53)           ", 0
+        .db TOPLINE - 80 - (LINEH*3), 0,  "         SOUND GENERATOR        ", 0
+        .db TOPLINE - 80 - (LINEH*2), 0,  "           8253 (VI53)          ", 0
+
+        ;.db 1, 1, 254 ; launch fish
 
         .db TOPLINE - 80 - (LINEH*4), 0,  "                                ", 0
         .db TOPLINE - 80 - (LINEH*4), 0,  "                                ", 0
@@ -2172,12 +2217,15 @@ msg_restart:
         .db TOPLINE - 80 - (LINEH*2), 0,  "                                ", 0
         .db TOPLINE - 80 - (LINEH*3), 0,  "                                ", 0
 
-        .db TOPLINE - 80 - (LINEH*2), 0,  " . . . . . . . . . . . . . . .  ", 0
+        .db 1, 1, 254 ; launch fish
+        .db TOPLINE - 80 - (LINEH*2), 0,  "      GREETINGS OUTLINE \\o/     ", 0
         
         .db TOPLINE - 80 - (LINEH*0), 0,  "                                ", 0
+        .db TOPLINE - 80 - (LINEH*0), 0,  "                                ", 0
+        .db TOPLINE - 80 - (LINEH*0), 0,  "                                ", 0
         .db TOPLINE - 80 - (LINEH*1), 0,  "                                ", 0   ; wipe previous
-        .db TOPLINE - 80 - (LINEH*2), 0,  "                                ", 0
         .db TOPLINE - 80 - (LINEH*3), 0,  "                                ", 0
+        .db TOPLINE - 80 - (LINEH*2), 0,  "                                ", 0
 
 ;msg7:   .db 20, 2, "BBSTRO BY SVOFSKI & IVAGOR", 0
         .db 1, 1, 255
@@ -2185,7 +2233,7 @@ msg_restart:
 msg_minus1: .db "SVOFSKI & IVAGOR", 0
 
 
-        .org 020h + $ & 0ffc0h  ; ALIGN 32
+        .org 020h + ($ & 0ffc0h)  ; ALIGN 32
 zero_init_start:
 
 intcount:   .dw 0
@@ -2210,15 +2258,28 @@ slow_msg_state:     .db 0
 slow_msg_ptr:       .dw 0
 slow_msg_loop:      .dw 0
 
-        .org 020h + $ & 0ffc0h  ; ALIGN 32
-zero_init_end:
+; fish vars
+fish_wraparound_flag:   .db 0
+msgseq_end_flag:        .db 0
+                ; ORDER IMPORTANT
+fish_col_frac:    .db 0
+fish_col:         .db 0
+;shiftctr:        .db 0
+fish_enabled:     .db 0
 
+
+        .org 020h + ($ & 0ffc0h)  ; ALIGN 32
+zero_init_end:
 
         ; big logo
         .include "blksbr.inc"
 
-
+        ; big time textuality
         .include "font8x8.inc"
+
+        .include "fish.inc"
+fishz0: .ds 32   ; empty sprite for wiping
+        .include "drawfish.inc"
 
         .org PLAYER_BASE-1
 	.db 0

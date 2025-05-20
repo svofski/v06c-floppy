@@ -233,3 +233,8 @@ elif mode == 'bits8':
     for line in chunker(data[0], 32):
         print('\t.db ', ','.join(['$%02x'%x for x in line]))
 
+    if labels[1] != '':
+        print(f'{labels[1]}:')
+    for line in chunker(data[1], 32):
+        print('\t.db ', ','.join(['$%02x'%x for x in line]))
+
