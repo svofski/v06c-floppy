@@ -709,12 +709,7 @@ nb_bbb:
 
         ret     ; bounds are cleared on read
         
-clear_bounds:        
-        mvi a, 256*NBOUNDS/32
-        lhld bounds
-        lxi d, 256 * NBOUNDS
-        dad d
-        ; quick wipe array in hl backwards c * 32 bytes, disabling interrupts
+        ; quick wipe array in hl backwards c * 32 bytes
 clear_array_backwards:
         xchg
         
@@ -724,7 +719,8 @@ clear_array_backwards:
 ;        di
         xchg
         sphl    ; sp = bounds_b + $600
-;        lxi b, $ffff ; fill with ff
+        dcr a
+        jz clrbounds_final
 clrbounds_pushkin:        
         push b \ push b \ push b \ push b       ; 32 bytes
         push b \ push b \ push b \ push b
@@ -732,14 +728,21 @@ clrbounds_pushkin:
         push b \ push b \ push b \ push b
         dcr a
         jnz clrbounds_pushkin
+clrbounds_final:
+        push b \ push b \ push b \ push b       ; 30+2 bytes
+        push b \ push b \ push b \ push b
+        push b \ push b \ push b \ push b
+        push b \ push b \ push b
+        lxi h,-1
+        dad sp
+        mov m,b
+        dcx h
+        mov m,c
 clrbounds_sp    .equ $+1
         lxi sp, 0
 ;        ei
         ret
         
-        jmp $
-        
-
 oneframe:
         call next_bounds
         lda frametime
