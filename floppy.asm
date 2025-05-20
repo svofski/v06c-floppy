@@ -388,10 +388,10 @@ RightAndMask:
 
 y1x1:   .db 5, 70
 y2x2:   .db 200, 5
-xinc:   .dw 0    
-ydir:   .db 0
-line_h: .db 0
-line_y: .db 0
+;xinc:   .dw 0    
+;ydir:   .db 0
+;line_h: .db 0
+;line_y: .db 0
         ; x1,y1 - x2,y2
         ; vert increment always +1, horz increment variable
 line:
@@ -399,25 +399,21 @@ line:
         xchg
         lhld y2x2
         ; swap so that y2 - y1 is positive
-        mov a, e
-        cmp l
+        mov a, l
+        sub e		; a = y2 - y1
         rz      ; dy = 0, nothing to do
-        jc line_2
-        xchg
-        shld y2x2
-        xchg
+        jnc line_2
         shld y1x1
         xchg
+        shld y2x2
+        mov a, l
+        sub e		; a = y2 - y1
         
 line_2:
-        lda y1x1
-        sta line_y        ; line_y = y1
-
-        mov b, a        ; y1
-        lda y2x2
-        sub b           ; a = y2 - y1
-        
         sta line_h      ; height = y2 - y1
+
+		mov a,e
+        sta line_y        ; line_y = y1
 
         mov a, h
         cmp d           ; x2 - x1
@@ -447,8 +443,8 @@ line_shl7:
 line_3:
         ; xinc = xinc / dy
         lhld xinc
-        lda line_h ;line_dy
-        mov c, a
+line_h	.equ $+1
+		mvi c,0
         xra a
         call udiv16248  ; hl = ahl/c
 ;        xchg            ; -> de
@@ -462,25 +458,22 @@ line_negxing:
 		sbb h\ sub l\ mov h,a
         
 line_ldx1:
-		shld set_xinc+1
+		shld xinc
 		
         ; main loop
-        lda line_y
 ;        call setbounds_setup
-        ;; a = line
 ;setbounds_setup:
-		mvi b,0
+line_y	.equ $+1
+		lxi b,0
 		mov h,b
-		mov l,a
-		mov c,a
+		mov l,c
 		dad b
 		dad b
 		dad h
 		dad b
-		mov c,l
-		mov b,h
+		xchg
         lhld bounds
-		dad b           ; hl = &bounds[y][0]
+		dad d           ; hl = &bounds[y][0]
 ;        shld setbounds_ptr
 		xchg
 
@@ -629,7 +622,7 @@ after_setbounds:
 		lxi h,line_h
 		dcr m
         pop h
-set_xinc:
+xinc	.equ $+1
 		lxi b,0
         dad b   ; x += xinc
 line_nexty:
