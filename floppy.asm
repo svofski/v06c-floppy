@@ -1403,10 +1403,14 @@ fade_out_loop:
 slowprint:
         lhld slow_msg_ptr
         lda slow_msg_state
-        ora a
+        ora a                 ; state == 0 :-> print
         jz slop_nextbyte
-        xra a
+        dcr a
         sta slow_msg_state
+        ;xra a
+        ;sta slow_msg_state
+        ora a                 ; state was 1 now 0 :-> new line
+        rnz                   ; otherwise just delay
         ; y, x
         mov e, m \ inx h
         mov d, m \ inx h
@@ -1419,6 +1423,8 @@ slop_nextbyte:
         shld _puts_sptr
         inx h
         shld slow_msg_ptr
+        cpi 253
+        jz delay_line
         cpi 254
         jz launch_fish
         cpi 255
@@ -1445,6 +1451,10 @@ launch_fish:
         mvi a, 1
         sta fish_col_frac
         sta fish_enabled
+        ret
+delay_line:
+        mvi a, 33
+        sta slow_msg_state
         ret
 
 
@@ -2126,16 +2136,20 @@ msg_restart:
         .db TOPLINE - 80 - LINEH, 0,      "     GAMEZ, DEMOS  AND DOCS     ", 0
         .db TOPLINE - 80 - (LINEH*2), 0,  "       RECENT & HISTORICAL      ", 0
 
-        .db TOPLINE - 80 - (LINEH*3), 0,  "                                ", 0
-        .db TOPLINE - 80 - (LINEH*3), 0,  "                                ", 0
+        ;.db TOPLINE - 80 - (LINEH*3), 0,  "                                ", 0
+        ;.db TOPLINE - 80 - (LINEH*3), 0,  "                                ", 0
+        .db 1, 1, 253
+        .db 1, 1, 253
         
         .db TOPLINE - 80, 0,              "      COME AND LEARN ABOUT      ", 0
         .db TOPLINE - 80 - (LINEH*1), 0,  "         -- -- -- -- --         ", 0
         .db TOPLINE - 80 - (LINEH*3), 0,  "            -- -- --            ", 0
         .db TOPLINE - 80 - (LINEH*2), 0,  "           VECTOR-06C           ", 0
 
-        .db TOPLINE - 80 - (LINEH*4), 0,  "                                ", 0
-        .db TOPLINE - 80 - (LINEH*4), 0,  "                                ", 0
+        ;.db TOPLINE - 80 - (LINEH*4), 0,  "                                ", 0
+        ;.db TOPLINE - 80 - (LINEH*4), 0,  "                                ", 0
+        .db 1, 1, 253
+        .db 1, 1, 253
 
         .db TOPLINE - 80 - (LINEH*1), 0,  "                                ", 0   ; wipe previous
         .db TOPLINE - 80 - (LINEH*2), 0,  "                                ", 0
@@ -2144,9 +2158,11 @@ msg_restart:
         .db TOPLINE - 80, 0,              "  CODE NEW DEMOS AND GAMES FOR  ", 0
         .db TOPLINE - 80 - (LINEH*1), 0,  "           BEKTOP-06",20,"           ", 0
         .db TOPLINE - 80 - (LINEH*2), 0,  "   FOR ITS POWERFUL 8080A CPU   ", 0
-        .db TOPLINE - 80 - (LINEH*3), 0,  "    BEAUTIFUL MNEMONICS, TOO    ", 0
-        .db TOPLINE - 80 - (LINEH*4), 0,  "                                ", 0
-        .db TOPLINE - 80 - (LINEH*4), 0,  "                                ", 0
+        .db TOPLINE - 80 - (LINEH*3), 0,  "      (BEAUTIFUL MNEMONICS)     ", 0
+        ;.db TOPLINE - 80 - (LINEH*4), 0,  "                                ", 0
+        ;.db TOPLINE - 80 - (LINEH*4), 0,  "                                ", 0
+        .db 1, 1, 253
+        .db 1, 1, 253
 
         .db TOPLINE - 80, 0,              "                                ", 0
         .db TOPLINE - 80 - (LINEH*1), 0,  "                                ", 0   ; wipe previous
@@ -2155,7 +2171,7 @@ msg_restart:
 
         .db TOPLINE - 80 + (LINEH*1), 0,  "     XCHG                       ", 0
         .db TOPLINE - 80 + (LINEH*1), 0,  "                      DAD SP    ", 0
-        .db TOPLINE - 80 + (LINEH*1), 0,  "          XTHL                  ", 0
+        .db TOPLINE - 80 + (LINEH*1), 0,  "            XTHL                ", 0
         .db TOPLINE - 80 + (LINEH*1), 0,  "        SPHL                    ", 0
         .db TOPLINE - 80 - (LINEH*3), 0,  "                                ", 0     ; wipe "beautiful mnemonics"
         .db TOPLINE - 80 + (LINEH*1), 0,  "                                ", 0
@@ -2169,13 +2185,15 @@ msg_restart:
         .db TOPLINE - 80 - (LINEH*1), 0,  "          THE AMAZING           ", 0
         .db TOPLINE - 80 - (LINEH*1), 0,  "         THE INCREDIBLE         ", 0
         .db TOPLINE - 80 - (LINEH*1), 0,  "       THE SECOND TO NONE       ", 0
-        .db TOPLINE - 80 - (LINEH*3), 0,  "         SOUND GENERATOR        ", 0
         .db TOPLINE - 80 - (LINEH*2), 0,  "           8253 (VI53)          ", 0
+        .db TOPLINE - 80 - (LINEH*3), 0,  "         SOUND GENERATOR        ", 0
 
         ;.db 1, 1, 254 ; launch fish
 
-        .db TOPLINE - 80 - (LINEH*4), 0,  "                                ", 0
-        .db TOPLINE - 80 - (LINEH*4), 0,  "                                ", 0
+        ;.db TOPLINE - 80 - (LINEH*4), 0,  "                                ", 0
+        ;.db TOPLINE - 80 - (LINEH*4), 0,  "                                ", 0
+        .db 1, 1, 253 ; delay
+        .db 1, 1, 253 ; delay
 
         .db TOPLINE - 80 - (LINEH*1), 0,  "                                ", 0   ; wipe previous
         .db TOPLINE - 80 - (LINEH*2), 0,  "                                ", 0
@@ -2186,19 +2204,23 @@ msg_restart:
         .db TOPLINE - 80 - (LINEH*3), 0,  "            -- -- --            ", 0
         .db TOPLINE - 80 - (LINEH*2), 0,  "        BEKTOP-06",20," PRODS        ", 0
 
-        .db TOPLINE - 80 - (LINEH*4), 0,  "                                ", 0
-        .db TOPLINE - 80 - (LINEH*4), 0,  "                                ", 0
+        ;.db TOPLINE - 80 - (LINEH*4), 0,  "                                ", 0
+        ;.db TOPLINE - 80 - (LINEH*4), 0,  "                                ", 0
+        .db 1, 1, 253
+        .db 1, 1, 253
 
         .db TOPLINE - 80 - (LINEH*1), 0,  "                                ", 0   ; wipe previous
         .db TOPLINE - 80 - (LINEH*2), 0,  "                                ", 0
         .db TOPLINE - 80 - (LINEH*3), 0,  "                                ", 0
 
-        .db TOPLINE - 80 - (LINEH*3), 0,  "                                ", 0
+        ;.db TOPLINE - 80 - (LINEH*3), 0,  "                                ", 0
+        .db 1, 1, 253
         .db TOPLINE - 80,             0,  "             CREDITS            ", 0
         .db TOPLINE - 80 - (LINEH*2), 0,  " CODE, GFX, MUSIC ..... SVOFSKI ", 0
         .db TOPLINE - 80 - (LINEH*3), 0,  " MAD CODE & BASS ....... IVAGOR ", 0
 
-        .db TOPLINE - 80 - (LINEH*4), 0,  "                                ", 0
+        ;.db TOPLINE - 80 - (LINEH*4), 0,  "                                ", 0
+        .db 1, 1, 253
 
         .db TOPLINE - 80 - (LINEH*1), 0,  "                                ", 0   ; wipe previous
         .db TOPLINE - 80 - (LINEH*2), 0,  "                                ", 0
@@ -2208,7 +2230,8 @@ msg_restart:
         .db TOPLINE - 80 - (LINEH*2), 0,  " BY SVOFSKI FEAT IVAGOR ON BEHS ", 0
         .db TOPLINE - 80 - (LINEH*3), 0,  "     - OG AUTHOR UNKNOWN -      ", 0
 
-        .db TOPLINE - 80 - (LINEH*4), 0,  "                                ", 0
+        ;.db TOPLINE - 80 - (LINEH*4), 0,  "                                ", 0
+        .db 1, 1, 253
 
         .db TOPLINE -  0, 4, "  KPOTOTEKA", 0
 
@@ -2217,18 +2240,26 @@ msg_restart:
         .db TOPLINE - 80 - (LINEH*2), 0,  "                                ", 0
         .db TOPLINE - 80 - (LINEH*3), 0,  "                                ", 0
 
-        .db 1, 1, 254 ; launch fish
         .db TOPLINE - 80 - (LINEH*2), 0,  "      GREETINGS OUTLINE \\o/     ", 0
+        .db 1, 1, 253
+        .db 1, 1, 254 ; launch fish
+        .db 1, 1, 253
+        .db 1, 1, 253
+        .db 1, 1, 253
+        .db 1, 1, 253
+        .db 1, 1, 253
+        .db 1, 1, 253
         
-        .db TOPLINE - 80 - (LINEH*0), 0,  "                                ", 0
-        .db TOPLINE - 80 - (LINEH*0), 0,  "                                ", 0
-        .db TOPLINE - 80 - (LINEH*0), 0,  "                                ", 0
-        .db TOPLINE - 80 - (LINEH*1), 0,  "                                ", 0   ; wipe previous
-        .db TOPLINE - 80 - (LINEH*3), 0,  "                                ", 0
+        ;.db TOPLINE - 80 - (LINEH*0), 0,  "                                ", 0
+        ;.db TOPLINE - 80 - (LINEH*0), 0,  "                                ", 0
+        ;.db TOPLINE - 80 - (LINEH*0), 0,  "                                ", 0
+        ;.db TOPLINE - 80 - (LINEH*1), 0,  "                                ", 0   ; wipe previous
+        ;.db TOPLINE - 80 - (LINEH*3), 0,  "                                ", 0
         .db TOPLINE - 80 - (LINEH*2), 0,  "                                ", 0
 
-;msg7:   .db 20, 2, "BBSTRO BY SVOFSKI & IVAGOR", 0
         .db 1, 1, 255
+
+        .ds 32  ; there's a bug with alignment somewhere!
 
 msg_minus1: .db "SVOFSKI & IVAGOR", 0
 
