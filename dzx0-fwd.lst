@@ -1,0 +1,167 @@
+0001   0000                             ;.project dzx0-fwd.4000
+0002   6000                             .org dzx0_org
+0003   6000             ; -----------------------------------------------------------------------------
+0004   6000             ; ZX0 8080 decoder by Ivan Gorodetsky - OLD FILE FORMAT v1 
+0005   6000             ; Based on ZX0 z80 decoder by Einar Saukas
+0006   6000             ; v1 (2021-02-15) - 103 bytes forward / 100 bytes backward
+0007   6000             ; v2 (2021-02-17) - 101 bytes forward / 100 bytes backward
+0008   6000             ; v3 (2021-02-22) - 99 bytes forward / 98 bytes backward
+0009   6000             ; v4 (2021-02-23) - 98 bytes forward / 97 bytes backward
+0010   6000             ; v5 (2021-08-16) - 94 bytes forward and backward (slightly faster)
+0011   6000             ; v6 (2021-08-17) - 92 bytes forward / 94 bytes backward (forward version slightly faster)
+0012   6000             ; v7 (2022-04-30) - 92 bytes forward / 94 bytes backward (source address now in DE, slightly faster)
+0013   6000             ; -----------------------------------------------------------------------------
+0014   6000             ; Parameters (forward):
+0015   6000             ;   DE: source address (compressed data)
+0016   6000             ;   BC: destination address (decompressing)
+0017   6000             ;
+0018   6000             ; Parameters (backward):
+0019   6000             ;   DE: last source address (compressed data)
+0020   6000             ;   BC: last destination address (decompressing)
+0021   6000             ; -----------------------------------------------------------------------------
+0022   6000             ; compress forward with <-c> option (<-classic> for salvador)
+0023   6000             ;
+0024   6000             ; compress backward with <-b -c> options (<-b -classic> for salvador)
+0025   6000             ;
+0026   6000             ; Compile with The Telemark Assembler (TASM) 3.2
+0027   6000             ; -----------------------------------------------------------------------------
+0028   6000             
+0029   6000             ;#define BACKWARD
+0030   6000             
+0031   6000             
+0032   6000             dzx0:
+0033   6000                             ; $18, 8 lines
+0034   6000                             ; $2f
+0035   6000                             ; $47..
+0036   6000 3A 21 C0                    lda $c021
+0037   6003 FE 81                       cpi $81
+0038   6005 CA 11 60                    jz bootscreen_da
+0039   6008 21 73 60                    lxi h, jokecall 
+0040   600B                             ; no boot screen, no jokes
+0041   600B AF                          xra a
+0042   600C 77                          mov m, a
+0043   600D 23                          inx h
+0044   600E 77                          mov m, a
+0045   600F 23                          inx h
+0046   6010 77                          mov m, a
+0047   6011             bootscreen_da:
+0048   6011 21 18 C0                    lxi h, $c018
+0049   6014 22 79 60                    shld mockblock
+0050   6017             
+0051   6017 21 17 60                    lxi h, $
+0052   601A             
+0053   601A 21 FF FF    		lxi h,0FFFFh
+0054   601D E5          		push h
+0055   601E 23          		inx h
+0056   601F 3E 80       		mvi a,080h
+0057   6021             dzx0_literals:
+0058   6021 CD 57 60    		call dzx0_elias
+0059   6024 CD 68 60    		call dzx0_ldir
+0060   6027 DA 3C 60    		jc dzx0_new_offset
+0061   602A CD 57 60    		call dzx0_elias
+0062   602D             dzx0_copy:
+0063   602D EB          		xchg
+0064   602E E3          		xthl
+0065   602F E5          		push h
+0066   6030 09          		dad b
+0067   6031 EB          		xchg
+0068   6032 CD 68 60    		call dzx0_ldir
+0069   6035 EB          		xchg
+0070   6036 E1          		pop h
+0071   6037 E3          		xthl
+0072   6038 EB          		xchg
+0073   6039 D2 21 60    		jnc dzx0_literals
+0074   603C             dzx0_new_offset:
+0075   603C CD 57 60    		call dzx0_elias
+0076   603F 67          		mov h,a
+0077   6040 F1          		pop psw
+0078   6041 AF          		xra a
+0079   6042 95          		sub l
+0080   6043 C8          		rz
+0081   6044 E5          		push h
+0082   6045 1F          		rar\ mov h,a
+0082   6046 67          
+0083   6047 1A          		ldax d
+0084   6048 1F          		rar\ mov l,a
+0084   6049 6F          
+0085   604A 13          		inx d
+0086   604B E3          		xthl
+0087   604C 7C          		mov a,h
+0088   604D 21 01 00    		lxi h,1
+0089   6050 D4 60 60    		cnc dzx0_elias_backtrack
+0090   6053 23          		inx h
+0091   6054 C3 2D 60    		jmp dzx0_copy
+0092   6057             dzx0_elias:
+0093   6057 2C          		inr l
+0094   6058             dzx0_elias_loop:	
+0095   6058 87          		add a
+0096   6059 C2 5F 60    		jnz dzx0_elias_skip
+0097   605C 1A          		ldax d
+0098   605D 13          		inx d
+0099   605E 17          		ral
+0100   605F             dzx0_elias_skip:
+0101   605F D8          		rc
+0102   6060             dzx0_elias_backtrack:
+0103   6060 29          		dad h
+0104   6061 87          		add a
+0105   6062 D2 58 60    		jnc dzx0_elias_loop
+0106   6065 C3 57 60    		jmp dzx0_elias
+0107   6068             
+0108   6068             dzx0_ldir:
+0109   6068 F5          		push psw
+0110   6069             dzx0_ldir1:
+0111   6069 1A          		ldax d
+0112   606A 02          		stax b
+0113   606B 13          		inx d
+0114   606C 03          		inx b
+0115   606D 2B          		dcx h
+0116   606E 7C          		mov a,h
+0117   606F B5          		ora l
+0118   6070 C2 69 60    		jnz dzx0_ldir1
+0119   6073             jokecall:
+0120   6073 CD 7B 60                    call joke
+0121   6076 F1          		pop psw
+0122   6077 87          		add a
+0123   6078 C9          		ret
+0124   6079 00 00       mockblock:      .dw 0
+0125   607B             joke:           
+0126   607B                             ;ora d
+0127   607B                             ;xra c
+0128   607B                             ;rpo
+0129   607B E5                          push h
+0130   607C D5                          push d
+0131   607D C5                          push b
+0132   607E 2A 79 60                    lhld mockblock
+0133   6081 3E 7E                       mvi a, $7e
+0134   6083 77                          mov m, a
+0135   6084             
+0136   6084 2C                          inr l ;; $18,$19..$1f
+0137   6085                                   ;; $30,$31..$37
+0138   6085 7D                          mov a, l
+0139   6086 E6 07                       ani 7
+0140   6088 C2 A3 60                    jnz nana
+0141   608B             nextblock:
+0142   608B 7D                          mov a, l
+0143   608C D6 08                       sui 8
+0144   608E 6F                          mov l, a
+0145   608F             
+0146   608F 24                          inr h
+0147   6090 7C                          mov a, h
+0148   6091 FE E0                       cpi $e0
+0149   6093 C2 A3 60                    jnz nana
+0150   6096             
+0151   6096 26 C0                       mvi h, $c0
+0152   6098 7D                          mov a, l
+0153   6099 C6 18                       adi $18
+0154   609B FE D8                       cpi $d8
+0155   609D C2 A2 60                    jnz $+5
+0156   60A0 3E 18                       mvi a, $18 ; rollover from the start
+0157   60A2 6F                          mov l, a
+0158   60A3             nana:
+0159   60A3 22 79 60                    shld mockblock
+0160   60A6 C1                          pop b
+0161   60A7 D1                          pop d
+0162   60A8 E1                          pop h
+0163   60A9 C9                          ret
+0164   60AA             		.end
+tasm: Number of errors = 0

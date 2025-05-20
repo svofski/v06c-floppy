@@ -1,0 +1,36 @@
+0001   0100                     .org $100
+0002   0100                     ;dst     equ $4000
+0003   0100                     ;dzx_sz  equ 92
+0004   0100                     ;data_sz equ 3328 + dzx_sz
+0005   0100                     ;lxi sp, data_sz
+0006   0100 F3                  di
+0007   0101 AF                  xra a
+0008   0102 D3 10               out $10
+0009   0104                     
+0010   0104 31 00 01            lxi sp, $100
+0011   0107 01 00 01            lxi b, $100
+0012   010A C5                  push b
+0013   010B                     
+0014   010B 11 33 01            lxi d, src
+0015   010E 21 00 60            lxi h, dst
+0016   0111 E5                  push h          ; unpacker return address = dst
+0017   0112             loop:
+0018   0112 1A                  ldax d
+0019   0113 77                  mov m, a
+0020   0114 23                  inx h
+0021   0115 13                  inx d
+0022   0116 7C                  mov a, h
+0023   0117 FE 7A               cpi  ((dst + data_sz + dzx_sz) >> 8) + 1 
+0024   0119 C2 12 01            jnz loop
+0025   011C                     
+0026   011C                     ; for dzx0: bc = source, de = destination
+0027   011C 11 AA 60            lxi d, dst + dzx_sz
+0028   011F C9                  ret
+0029   0120 53 56 4F 46         .db "SVOFSKI|IVAGOR|2025"
+0029   0124 53 4B 49 7C 
+0029   0128 49 56 41 47 
+0029   012C 4F 52 7C 32 
+0029   0130 30 32 35 
+0030   0133             src     .equ $    
+0031   0133                     ; here there lies dzx7
+0032   0133                     .endtasm: Number of errors = 0
