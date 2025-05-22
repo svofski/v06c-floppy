@@ -15,8 +15,8 @@
 
 
 
-     This is in essence a bbstro because it advertises an 
-     archive (Kartoteka) of software and documentation for Vector-06c.
+     This is in essence a bbstro because it advertises an archive 
+     or index (Kartoteka) of software and documentation for Vector-06c.
      
      Back in the early 90s I saw what I believe was a PC bbstro,
      or a cracktro, which featured a 3.5-inch floppy flying in space. 
@@ -32,7 +32,9 @@
      RAM:   64K of which 32K is allocated to 256x256@4bpp bitmap graphics
      Sound: KR580VI53 (Intel 8253) 3-channel programmable interval timer
      
+
      Full credits:
+     -------------
 
      idea, graphics          svofski
      code                    svofski, ivagor
