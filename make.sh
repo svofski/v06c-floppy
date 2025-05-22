@@ -70,9 +70,10 @@ echo "$RELOC_BIN: $RELOC_SZ octets"
 cat $RELOC_BIN $DZX0_BIN $ROM_ZX0 > $ROMZ
 
 ../bin2wav/bin2wav.js floppy.rom floppy.wav
-
+../bin2wav/bin2wav.js -m v06c-turbo floppy.rom floppy-turbo.wav
 
 mkdir -p release
 cp blksbr.nfo release/
 cp floppy.rom release/blksbr.rom
 cp floppy.wav release/blksbr.wav
+cp floppy-turbo.wav release/blksbr-turbo.wav

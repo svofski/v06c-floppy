@@ -10,9 +10,9 @@
 maybe_wipe_fish:
                 mvi a, $ff
                 sta fish_wraparound_flag
-                lda msgseq_end_flag
-                ora a
-                rz
+                ;lda msgseq_end_flag
+                ;ora a
+                ;rz
                 xra a
                 sta fish_enabled
                 ; time to let go of the fish

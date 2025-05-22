@@ -1,10 +1,10 @@
-	; 💾 картинки нет печальнее на свете
-	;    чем демо о летающей дискете
+        ; 💾 картинки нет печальнее на свете
+        ;    чем демо о летающей дискете
         ;
-	; svofski & ivagor 2025
-	;
-	; Вектор-06ц БЛК+СБР!
-	;
+        ; svofski & ivagor 2025
+        ;
+        ; Вектор-06ц БЛК+СБР!
+        ;
 
 ;#define FADE_IN
 #define FADE_OUT
@@ -22,7 +22,7 @@ BUTTPLANE       .equ $c0
 BUTTPLANE_A     .equ $c0
 BUTTPLANE_B     .equ $e0
 PixTabA         .equ 7800h
-PixTabB		.equ 7C00h
+PixTabB         .equ 7C00h
 DEG90           .equ 256/4
 
         .org $100
@@ -85,7 +85,7 @@ DEG90           .equ 256/4
         lxi h, PixTabB
         mvi a, BUTTPLANE_B
         call MakePixTab
-		
+                
         mvi a, 1
         out $2
 
@@ -220,7 +220,7 @@ varblit:
         
 ;                mov l, c
                 mov l,a
-                .db 0FEh	; cpi .. , skip pop b
+                .db 0FEh        ; cpi .. , skip pop b
 vb_L0:                
                 pop b       ; c = first column, b = premultiplied jump offset = (16-end) * 5
                 mov a, b    ; end = 255, 255
@@ -277,65 +277,65 @@ vb_hl:          .dw 0
 
 MakePixTab:        
 ;HiAdr - PixTab+0000h
-		;lxi h,PixTab
-		;mvi a,BUTTPLANE
-		mvi b,32
+                ;lxi h,PixTab
+                ;mvi a,BUTTPLANE
+                mvi b,32
 MakePixTab2:
-		mvi c,8
+                mvi c,8
 MakePixTab1:
-		mov m,a
-		inx h
-		dcr c
-		jnz MakePixTab1
-		inr a
-		dcr b
-		jnz MakePixTab2
+                mov m,a
+                inx h
+                dcr c
+                jnz MakePixTab1
+                inr a
+                dcr b
+                jnz MakePixTab2
 
 ;LeftMask - PixTab+0100h
-		mvi b,8
-		mvi a,80h
-		mov d,a
+                mvi b,8
+                mvi a,80h
+                mov d,a
 MakePixTab9:
-		mvi c,7
-		inx h
+                mvi c,7
+                inx h
 MakePixTab8:
-		mov m,a
-		rrc\ ora d
-		inx h
-		dcr c
-		jnz MakePixTab8
-		xra a\ ora d\ rar\ mov d,a
-		dcr b
-		jnz MakePixTab9
-		mvi l,0
-		inr h
+                mov m,a
+                rrc\ ora d
+                inx h
+                dcr c
+                jnz MakePixTab8
+                xra a\ ora d\ rar\ mov d,a
+                dcr b
+                jnz MakePixTab9
+                mvi l,0
+                inr h
 
 ;PixLeft - PixTab+0200h
-		mvi b,32
+                mvi b,32
 MakePixTab7:
-		mvi a,8
+                mvi a,8
 MakePixTab6:
-		mov m,a
-		inx h
-		dcr a
-		jnz MakePixTab6
-		dcr b
-		jnz MakePixTab7
+                mov m,a
+                inx h
+                dcr a
+                jnz MakePixTab6
+                dcr b
+                jnz MakePixTab7
 
 
 ;PixMaskLeft - PixTab+0300h
-		mvi b,32
+                mvi b,32
 MakePixTab5:
-		mvi a,255
-		mvi c,8
+                mvi a,255
+                mvi c,8
 MakePixTab4:
-		mov m,a
-		ora a\ rar
-		inx h
-		dcr c
-		jnz MakePixTab4
-		dcr b
-		jnz MakePixTab5
+                mov m,a
+                ora a\ rar
+                inx h
+                dcr c
+                jnz MakePixTab4
+                dcr b
+                jnz MakePixTab5
         ret
 
 clrscr:        
@@ -376,36 +376,36 @@ setpixel_bp     .equ $+1
                 mov m, a
                 ret
 
-		.org 400h
+                .org 400h
 PixelMask:
-		.db 10000000b
-		.db 01000000b
-		.db 00100000b
-		.db 00010000b
-		.db 00001000b
-		.db 00000100b
-		.db 00000010b
-		.db 00000001b
+                .db 10000000b
+                .db 01000000b
+                .db 00100000b
+                .db 00010000b
+                .db 00001000b
+                .db 00000100b
+                .db 00000010b
+                .db 00000001b
         
 RightOrMask:
-		.db 00000000b
-		.db 10000000b
-		.db 11000000b
-		.db 11100000b
-		.db 11110000b
-		.db 11111000b
-		.db 11111100b
-		.db 11111110b
+                .db 00000000b
+                .db 10000000b
+                .db 11000000b
+                .db 11100000b
+                .db 11110000b
+                .db 11111000b
+                .db 11111100b
+                .db 11111110b
 
 RightAndMask:
-		.db 11111111b
-		.db 01111111b
-		.db 00111111b
-		.db 00011111b
-		.db 00001111b
-		.db 00000111b
-		.db 00000011b
-		.db 00000001b
+                .db 11111111b
+                .db 01111111b
+                .db 00111111b
+                .db 00011111b
+                .db 00001111b
+                .db 00000111b
+                .db 00000011b
+                .db 00000001b
 
 
 y1x1:   .db 5, 70
@@ -422,19 +422,19 @@ line:
         lhld y2x2
         ; swap so that y2 - y1 is positive
         mov a, l
-        sub e		; a = y2 - y1
+        sub e           ; a = y2 - y1
         rz      ; dy = 0, nothing to do
         jnc line_2
         shld y1x1
         xchg
         shld y2x2
         mov a, l
-        sub e		; a = y2 - y1
+        sub e           ; a = y2 - y1
         
 line_2:
         sta line_h      ; height = y2 - y1
 
-		mov a,e
+                mov a,e
         sta line_y        ; line_y = y1
 
         mov a, h
@@ -465,8 +465,8 @@ line_shl7:
 line_3:
         ; xinc = xinc / dy
         lhld xinc
-line_h	.equ $+1
-		mvi c,0
+line_h  .equ $+1
+                mvi c,0
         xra a
         call udiv16248  ; hl = ahl/c
 ;        xchg            ; -> de
@@ -476,28 +476,28 @@ line_xsgn:
         jnc line_ldx1
 line_negxing:
         ; xinc = -xinc
-		xra a\ sub l\ mov l,a
-		sbb h\ sub l\ mov h,a
+                xra a\ sub l\ mov l,a
+                sbb h\ sub l\ mov h,a
         
 line_ldx1:
-		shld xinc
-		
+        shld xinc
+                
         ; main loop
 ;        call setbounds_setup
 ;setbounds_setup:
-line_y	.equ $+1
-		lxi b,0
-		mov h,b
-		mov l,c
-		dad b
-		dad b
-		dad h
-		dad b
-		xchg
+line_y  .equ $+1
+        lxi b,0
+        mov h,b
+        mov l,c
+        dad b
+        dad b
+        dad h
+        dad b
+        xchg
         lhld bounds
-		dad d           ; hl = &bounds[y][0]
+        dad d           ; hl = &bounds[y][0]
 ;        shld setbounds_ptr
-		xchg
+        xchg
 
         lda y1x1+1      ; x1
         ora a
@@ -506,17 +506,17 @@ line_y	.equ $+1
         mvi a, 0
         rar
         mov l, a        ; hl = x1 << 7
-		
+                
 line_4:        
         ; d = y, hl = x << 7
 line_putpixel:
         push h
         dad h \ mov a, h ; a = floor(x)
         
-                ;push d \ push h \ push b \ push psw
-                ;mov h, a
-                ;call setpixel ; h=x, l=y
-                ;pop psw \ pop b \ pop h \ pop d
+        ;push d \ push h \ push b \ push psw
+        ;mov h, a
+        ;call setpixel ; h=x, l=y
+        ;pop psw \ pop b \ pop h \ pop d
               
 ;        call setbounds
         ; insert coordinate a to bounds[l][0], maintain ascending order
@@ -524,36 +524,36 @@ setbounds:
         lxi h, NBOUNDS
         dad d
 ;                                   ; 20+4+12+12+20=68
-										; hl = &bounds[y][7]
-		xchg
+                                                                                ; hl = &bounds[y][7]
+        xchg
         cmp m   ; bounds[i] - x, x < bounds[i] if no carry
         jnc sbins_k1     ; if x >= bounds[k] -> next k
-		;x<bounds[0]
-		mov b,m
-		mov m,a
+        ;x<bounds[0]
+        mov b,m
+        mov m,a
         inr b
-		jz after_setbounds				; if 255 == bounds[k] bounds[k] = x, return
+        jz after_setbounds                              ; if 255 == bounds[k] bounds[k] = x, return
         ; else insert
-		dcr b
-		inx h\ inx h\ inx h\ inx h		; hl = &bounds[y][4]
-		mvi a,255
+        dcr b
+        inx h\ inx h\ inx h\ inx h              ; hl = &bounds[y][4]
+        mvi a,255
         
         ; scan empty space before committing to memmove
         ;k = 4 
         cmp m \ jnz insx44 \ dcx h     ; --> 348088 ( -1260)
         cmp m \ jnz insx43 \ dcx h
         cmp m \ jnz insx42 \ dcx h
-;        cmp m \ jnz insx41
-;		mov m,b
-		cmp m\ jz after_setbounds_
+;       cmp m \ jnz insx41
+;       mov m,b
+        cmp m\ jz after_setbounds_
         jmp insx41
-		
-insx44:        mov a,m \ inx h \ mov m,a \ dcx h \ dcx h ; k = 4, d[k+1] = d[k], k = 3
-insx43:        mov a,m \ inx h \ mov m,a \ dcx h \ dcx h ; k = 3, d[k+1] = d[k], k = 2
-insx42:        mov a,m \ inx h \ mov m,a \ dcx h \ dcx h ; k = 2, d[k+1] = d[k], k = 1
-insx41:        mov a,m \ mov m,b\ inx h \ mov m,a ; k = 1, d[k+1] = d[k], k = 0
-                ; k = 0, d[k+1] = d[k], k = 1
-               jmp after_setbounds
+                
+insx44: mov a,m \ inx h \ mov m,a \ dcx h \ dcx h ; k = 4, d[k+1] = d[k], k = 3
+insx43: mov a,m \ inx h \ mov m,a \ dcx h \ dcx h ; k = 3, d[k+1] = d[k], k = 2
+insx42: mov a,m \ inx h \ mov m,a \ dcx h \ dcx h ; k = 2, d[k+1] = d[k], k = 1
+insx41: mov a,m \ mov m,b\ inx h \ mov m,a ; k = 1, d[k+1] = d[k], k = 0
+        ; k = 0, d[k+1] = d[k], k = 1
+        jmp after_setbounds
         
 sbins_k1:
         inx h
@@ -562,10 +562,10 @@ sbins_k1:
         mov b,m
         mov m,a
         inr b
-        jz after_setbounds				; if 255 == bounds[k] bounds[k] = x, return
+        jz after_setbounds                              ; if 255 == bounds[k] bounds[k] = x, return
         ; else insert
         dcr b
-        inx h\ inx h\ inx h		; hl = &bounds[y][4]
+        inx h\ inx h\ inx h             ; hl = &bounds[y][4]
         mvi a,255
         
         ; scan empty space before committing to memmove
@@ -573,14 +573,14 @@ sbins_k1:
         cmp m \ jnz insx34 \ dcx h     ; -> 347784 ( -304)
         cmp m \ jnz insx33 \ dcx h
 ;        cmp m \ jnz insx32
-;		mov m,b
+;               mov m,b
         cmp m\ jz after_setbounds_
         jmp insx32
         
-insx34:        mov a,m \ inx h \ mov m,a \ dcx h \ dcx h ; k = 4, d[k+1] = d[k], k = 3
-insx33:        mov a,m \ inx h \ mov m,a \ dcx h \ dcx h ; k = 3, d[k+1] = d[k], k = 2
-insx32:        mov a,m \ mov m,b\ inx h \ mov m,a ; k = 2, d[k+1] = d[k], k = 1
-               jmp after_setbounds
+insx34: mov a,m \ inx h \ mov m,a \ dcx h \ dcx h ; k = 4, d[k+1] = d[k], k = 3
+insx33: mov a,m \ inx h \ mov m,a \ dcx h \ dcx h ; k = 3, d[k+1] = d[k], k = 2
+insx32: mov a,m \ mov m,b\ inx h \ mov m,a ; k = 2, d[k+1] = d[k], k = 1
+        jmp after_setbounds
         
 sbins_k2:        
         inx h
@@ -589,7 +589,7 @@ sbins_k2:
         mov b,m
         mov m,a
         inr b
-        jz after_setbounds		         ; if 255 == bounds[k] bounds[k] = x, return
+        jz after_setbounds                       ; if 255 == bounds[k] bounds[k] = x, return
         ; else insert
         dcr b
         ;k = 2
@@ -605,7 +605,7 @@ sbins_k3:
         mov b,m
         mov m,a
         inr b
-        jz after_setbounds		         ; if 255 == bounds[k] bounds[k] = x, return
+        jz after_setbounds                       ; if 255 == bounds[k] bounds[k] = x, return
         ; else insert
         dcr b
         ;k = 3
@@ -621,7 +621,7 @@ sbins_k4:
         mov b,m
         mov m,a
         inr b
-        jz after_setbounds		         ; if 255 == bounds[k] bounds[k] = x, return
+        jz after_setbounds                       ; if 255 == bounds[k] bounds[k] = x, return
         ; else insert
         dcr b
         ;k = 4 
@@ -637,15 +637,15 @@ sbins_k5:
         jnz after_setbounds         ; if 255 == bounds[k] bounds[k] = x, return
         mov m, a
 
-        .db 0FEh				;cpi ...
+        .db 0FEh                                ;cpi ...
 after_setbounds_:
         mov m,b
 after_setbounds:
-	lxi h,line_h
-	dcr m
+        lxi h,line_h
+        dcr m
         pop h
-xinc	.equ $+1
-	lxi b,0
+xinc    .equ $+1
+        lxi b,0
         dad b   ; x += xinc
 line_nexty:
         jnz line_4
@@ -931,8 +931,8 @@ fb_nextstate:
 ;        lda fb_state - лишняя команда
         sta fb_prev
 ;        lda fb_next
-fb_next	.equ $+1
-		mvi a,0
+fb_next .equ $+1
+                mvi a,0
         sta fb_state    ; 16+8+16=40
 
         ;; inner loop that iterates max 6 + 6 bounds
@@ -959,22 +959,22 @@ fb_bounds_loop:
         stax d
         ;#
         
-        inx d           ; ++ib		
-		
-;		cmp c
+        inx d           ; ++ib          
+                
+;               cmp c
 ;        jnz fb_if_done
-;		jmp fb_bounds_loop_break	;здесь никогда не срабатывает, т.к. в эту ветку не можем попасть при xb[ib]=255
+;               jmp fb_bounds_loop_break        ;здесь никогда не срабатывает, т.к. в эту ветку не можем попасть при xb[ib]=255
 
-		jmp fb_if_done
+                jmp fb_if_done
 
 fb_if_else:
         mov c, m
 ;fb_if_done:
         ; if x2 == 255 break
-		mvi a,255
-		cmp c
+        mvi a,255
+        cmp c
         jz fb_bounds_loop_break
-		inx h
+        inx h
         lda fb_next
         xri $80         ; next_a = !state_a
         sta fb_next
@@ -983,8 +983,8 @@ fb_if_else:
         
 fb_if_done:
 ;        lda fb_state
-fb_state	.equ $+1
-		mvi a,0
+fb_state .equ $+1
+        mvi a,0
         ora a           ; $00 -> Z=1                    -> continue
                         ; $80 -> Z=0, S=1, P=0          -> A (fill)
                         ; $C0 -> Z=0, S=1, P=1          -> continue
@@ -993,7 +993,7 @@ fb_state	.equ $+1
         jpe fb_nextstate
 ;        jm fb_fillline
 ;        jmp fb_wipeline
-		jp fb_wipeline
+        jp fb_wipeline
         
 fb_fillline:        
         ; this.hfill(x1, x2, y, INK);
@@ -1009,69 +1009,69 @@ fb_fillline:
         ;; b = x1, c = x2
 ;hline_xy:           
         mov e, a
-		mov l,b
+        mov l,b
         ; c - b = count
         mov a, c
         sub b
         inr a
         mov b, a
-hline_pixtab_plus_2 .equ $+1		
-		mvi h,(PixTabA>>8)+2
-		sub m
-hline_pixtab_plus_0 .equ $+1		
-		mvi h,(PixTabA>>8)
-        mov d,m				;HiAdr
-;		jnc hline_xy_LeftBlock
-		jc hline_xy_LeftBlock
-		
-		mov b,a
-hline_pixtab_plus_3 .equ $+1		
-		mvi h,(PixTabA>>8)+3
+hline_pixtab_plus_2 .equ $+1            
+        mvi h,(PixTabA>>8)+2
+        sub m
+hline_pixtab_plus_0 .equ $+1            
+        mvi h,(PixTabA>>8)
+        mov d,m                         ;HiAdr
+;       jnc hline_xy_LeftBlock
+        jc hline_xy_LeftBlock
+                
+        mov b,a
+hline_pixtab_plus_3 .equ $+1            
+        mvi h,(PixTabA>>8)+3
         mov a,m
-		xchg
-		ora m
-		mov m,a
-	xra a
-	ora b
-	jz hline_xy_end
+        xchg
+        ora m
+        mov m,a
+        xra a
+        ora b
+        jz hline_xy_end
 hline_xy_L3:
         inr h           ; next column
         sui 8
-	jnc hline_xy_L4
-	adi (RightOrMask&255)+8
-	mov e,a
-	mvi d,RightOrMask>>8
-	ldax d
-	ora m
-	mov m,a
-	jmp hline_xy_end
+        jnc hline_xy_L4
+        adi (RightOrMask&255)+8
+        mov e,a
+        mvi d,RightOrMask>>8
+        ldax d
+        ora m
+        mov m,a
+        jmp hline_xy_end
 
 hline_xy_L4:
-        ; go in chunks
+        ; fill in chunks
         mvi m, 255
         jnz hline_xy_L3
         jmp hline_xy_end
 
 hline_xy_LeftBlock:
-		mvi a,7
-		ana l
-		rlc\ rlc\ rlc
-		ora b
-		mov l,a
-		inr h				;to LeftMask
-		ldax d
-		ora m
-		stax d
+        mvi a,7
+        ana l
+        rlc\ rlc\ rlc
+        ora b
+        mov l,a
+        inr h                           ;to LeftMask
+        ldax d
+        ora m
+        stax d
 
 hline_xy_end:
         ; [prev, state] = [state, next]
 ;        lhld fb_state   
 ;        shld fb_prev    ; 20+20 = 40 (+28 = 68, but!)
-		lda fb_state
-		sta fb_prev
-		lda fb_next
-		sta fb_state
-        
+        lda fb_state
+        sta fb_prev
+        lda fb_next
+        sta fb_state
+
         pop h
         pop d
         jmp fb_bounds_loop
@@ -1079,70 +1079,70 @@ fb_wipeline:
         ; ; if (prev_a == 1) ++x1
 ;        lda fb_prev
 ;        ora a
-fb_prev	.equ $+1
-		ori 0		;сюда приходим с A7=0, остальные биты не выжны
+fb_prev .equ $+1
+        ori 0           ;сюда приходим с A7=0, остальные биты не выжны
         jm fb_3
         ; else if (next_a == 1) --x2
         lda fb_next
         ora a
         jp fb_5_
         mvi a,-1
-		add c
-		jmp fb_5
+        add c
+        jmp fb_5
 fb_3:
-		inr b
+        inr b
 fb_5_:
-		mov a,c
+        mov a,c
 fb_5:
         ; c - b = count
         sub b
         jc fb_4
 
-		push h
+        push h
         push d
-		mov e,b
+        mov e,b
         inr a
         mov b, a
 
         lhld fb_y
-		xchg
+        xchg
 
 ;        call hwipe_xy
         ;; fast wipe horizontal segment
         ;; e = y
-		;; l= x1
+                ;; l= x1
         ;; b = x2-x1+1
 ;hwipe_xy:           
 hwipe_pixtab_plus_2 .equ $+1
-		mvi h,(PixTabA>>8)+2
-		sub m
-hwipe_pixtab_plus_0 .equ $+1		
-		mvi h,(PixTabA>>8)
-        mov d,m				;HiAdr
-		jc hwipe_xy_LeftBlock
-		
-		mov b,a
-hwipe_pixtab_plus_3 .equ $+1		
-		mvi h,(PixTabA>>8)+3
+        mvi h,(PixTabA>>8)+2
+        sub m
+hwipe_pixtab_plus_0 .equ $+1            
+        mvi h,(PixTabA>>8)
+        mov d,m                         ;HiAdr
+        jc hwipe_xy_LeftBlock
+                
+        mov b,a
+hwipe_pixtab_plus_3 .equ $+1            
+        mvi h,(PixTabA>>8)+3
         mov a,m
-		xchg
-		cma
-		ana m
-		mov m,a
-	xra a
-	ora b
-	jz hwipe_xy_end
+        xchg
+        cma
+        ana m
+        mov m,a
+        xra a
+        ora b
+        jz hwipe_xy_end
 hwipe_xy_L3:
         inr h           ; next column
         sui 8
-	jnc hwipe_xy_L4
-	adi (RightAndMask&255)+8
-	mov e,a
-	mvi d,RightAndMask>>8
-	ldax d
-	ana m
-	mov m,a
-	jmp hwipe_xy_end
+        jnc hwipe_xy_L4
+        adi (RightAndMask&255)+8
+        mov e,a
+        mvi d,RightAndMask>>8
+        ldax d
+        ana m
+        mov m,a
+        jmp hwipe_xy_end
 
 hwipe_xy_L4:
         ; do in chunks
@@ -1150,30 +1150,29 @@ hwipe_xy_L4:
         jnz hwipe_xy_L3
         jmp hwipe_xy_end
 
-hwipe_xy_LeftBlock:		
-		mvi a,7
-		ana l
-		rlc\ rlc\ rlc
-		ora b
-		mov l,a
-		inr h				;to LeftMask
-		ldax d
-		ora m
-		xra m
-		stax d
+hwipe_xy_LeftBlock:             
+        mvi a,7
+        ana l
+        rlc\ rlc\ rlc
+        ora b
+        mov l,a
+        inr h                           ;to LeftMask
+        ldax d
+        ora m
+        xra m
+        stax d
 
 hwipe_xy_end:
-		pop d
+        pop d
         pop h
 fb_4:        
         ; [prev, state] = [state, next]
 ;        lhld fb_state   
 ;        shld fb_prev    ; 20+20 = 40 (+28 = 68, but!)
-		lda fb_state
-		sta fb_prev
-		lda fb_next
-		sta fb_state
-		
+        lda fb_state
+        sta fb_prev
+        lda fb_next
+        sta fb_state
         
         jmp fb_bounds_loop
 
@@ -1192,8 +1191,8 @@ fb_bounds_loop_cont:
         xchg
 fb_bounds_loop_nexty:        
 ;        lda fb_y
-fb_y	.equ $+1
-		mvi a,0
+fb_y    .equ $+1
+        mvi a,0
         dcr a
 
         ; lfsr for line shuffling, but we need to update bounds/bounds_b by the same law, too much effort
@@ -1221,54 +1220,53 @@ fb_y	.equ $+1
 ;A=AHL%C
 ;16=24/8
 udiv16248:
-	dad h\ adc a\ jc $+7\ cmp c\ jc $+5 \ sub c\ inr l
-	dad h\ adc a\ jc $+7\ cmp c\ jc $+5 \ sub c\ inr l
-	dad h\ adc a\ jc $+7\ cmp c\ jc $+5 \ sub c\ inr l
-	dad h\ adc a\ jc $+7\ cmp c\ jc $+5 \ sub c\ inr l
+        dad h\ adc a\ jc $+7\ cmp c\ jc $+5 \ sub c\ inr l
+        dad h\ adc a\ jc $+7\ cmp c\ jc $+5 \ sub c\ inr l
+        dad h\ adc a\ jc $+7\ cmp c\ jc $+5 \ sub c\ inr l
+        dad h\ adc a\ jc $+7\ cmp c\ jc $+5 \ sub c\ inr l
 
-	dad h\ adc a\ jc $+7\ cmp c\ jc $+5 \ sub c\ inr l
-	dad h\ adc a\ jc $+7\ cmp c\ jc $+5 \ sub c\ inr l
-	dad h\ adc a\ jc $+7\ cmp c\ jc $+5 \ sub c\ inr l
-	dad h\ adc a\ jc $+7\ cmp c\ jc $+5 \ sub c\ inr l
+        dad h\ adc a\ jc $+7\ cmp c\ jc $+5 \ sub c\ inr l
+        dad h\ adc a\ jc $+7\ cmp c\ jc $+5 \ sub c\ inr l
+        dad h\ adc a\ jc $+7\ cmp c\ jc $+5 \ sub c\ inr l
+        dad h\ adc a\ jc $+7\ cmp c\ jc $+5 \ sub c\ inr l
 
-	dad h\ adc a\ jc $+7\ cmp c\ jc $+5 \ sub c\ inr l
-	dad h\ adc a\ jc $+7\ cmp c\ jc $+5 \ sub c\ inr l
-	dad h\ adc a\ jc $+7\ cmp c\ jc $+5 \ sub c\ inr l
-	dad h\ adc a\ jc $+7\ cmp c\ jc $+5 \ sub c\ inr l
+        dad h\ adc a\ jc $+7\ cmp c\ jc $+5 \ sub c\ inr l
+        dad h\ adc a\ jc $+7\ cmp c\ jc $+5 \ sub c\ inr l
+        dad h\ adc a\ jc $+7\ cmp c\ jc $+5 \ sub c\ inr l
+        dad h\ adc a\ jc $+7\ cmp c\ jc $+5 \ sub c\ inr l
 
-	dad h\ adc a\ jc $+7\ cmp c\ jc $+5 \ sub c\ inr l
-	dad h\ adc a\ jc $+7\ cmp c\ jc $+5 \ sub c\ inr l
-	dad h\ adc a\ jc $+7\ cmp c\ jc $+5 \ sub c\ inr l
-	dad h\ adc a\ jc $+5\ cmp c\ rc\ sub c\ inr l
-	ret
+        dad h\ adc a\ jc $+7\ cmp c\ jc $+5 \ sub c\ inr l
+        dad h\ adc a\ jc $+7\ cmp c\ jc $+5 \ sub c\ inr l
+        dad h\ adc a\ jc $+7\ cmp c\ jc $+5 \ sub c\ inr l
+        dad h\ adc a\ jc $+5\ cmp c\ rc\ sub c\ inr l
+        ret
       
     ; Программирование палитры
 set_palette_pp:
-    mvi a, $88
-    out 0
-    mvi a, 255
-    out 3
-    lxi b, 0
+        mvi a, $88
+        out 0
+        mvi a, 255
+        out 3
+        lxi b, 0
 setpal_select .equ $+1          
-    lxi d, pal_b
+        lxi d, pal_b
 _setpal_pp_1:
-    mov a, c
-    out 2
-    ldax d
-    out $c
-	xthl
-    out $c
-	xthl
-    inx d
-    inr c
-	nop\ nop
-    out $c
+        mov a, c
+        out 2
+        ldax d
+        out $c
+        xthl
+        out $c
+        xthl
+        inx d
+        inr c
+        nop \ nop
+        out $c
 setpal_top .equ $+1             ; set to 3 to only program first 3 colors
-    mvi a,$10
-	cmp c
-    jnz _setpal_pp_1
-    ret
-    
+        mvi a,$10
+        cmp c
+        jnz _setpal_pp_1
+        ret
 
 ; light floppy theme
 
@@ -1292,7 +1290,15 @@ BLKC    .equ 232q
 WHTC    .equ 377q    
 XXXC    .equ 110q
 
-
+;;;; semi-transparent
+;WHTCt    .equ 377q-011q
+;
+;pal_a: ; $e0  
+;    ;    0    1    2    3    4    5    6    7    8    9    a    b    c    d    e    f
+;    .db  BLKC,CLRA,BLKC,CLRA,WHTC,WHTCt,WHTC,WHTCt,XXXC,XXXC,XXXC,XXXC,XXXC,XXXC,XXXC,BLKC
+;pal_b: ; $c0    
+;    .db  BLKC,BLKC,CLRB,CLRB,WHTC,WHTC,WHTCt,WHTCt,XXXC,XXXC,XXXC,XXXC,XXXC,XXXC,XXXC,BLKC
+;;;;
 
 pal_a: ; $e0  
     ;    0    1    2    3    4    5    6    7    8    9    a    b    c    d    e    f
@@ -1460,23 +1466,23 @@ delay_line:
 
 
 ISRstack:
-	.ds 32
+        .ds 32
 ISRstackEnd:
 ISR:
-	shld ISRsetHL+1
-	pop h
-	shld ISRsetRet+1
-	push psw
-	lxi h,2
-	dad sp
-	shld ISRsetSP+1
-	mov l,c
-	mov h,b
-	xthl
-	lxi sp,ISRstackEnd
-	push h				;push psw
-	push b
-	push d
+        shld ISRsetHL+1
+        pop h
+        shld ISRsetRet+1
+        push psw
+        lxi h,2
+        dad sp
+        shld ISRsetSP+1
+        mov l,c
+        mov h,b
+        xthl
+        lxi sp,ISRstackEnd
+        push h                          ;push psw
+        push b
+        push d
 
         call set_palette_pp
 
@@ -1501,17 +1507,17 @@ ISR:
         ora a
         cnz slowprint
 
-	pop d
-	pop b
-	pop psw
+        pop d
+        pop b
+        pop psw
 ISRsetSP:
-	lxi sp,0
+        lxi sp,0
 ISRsetHL:
-	lxi h,0
-	ei
+        lxi h,0
+        ei
 ISRsetRet:
-	jmp 0
-	
+        jmp 0
+        
         ; active bounds
 bounds:         .dw bounds_0
 bounds_b:       .dw bounds_1
@@ -1523,7 +1529,7 @@ bounds1_b:      .dw bounds_1
 bounds2:        .dw bounds_2
 bounds2_b:      .dw bounds_3
 
-		.ds 2
+                .ds 2
 
         ; polygon bounds array
         .org 0100h + $ & 0ff00h  ; ALIGN 256
@@ -1573,48 +1579,38 @@ rot_loop:
           ora c
           jz rot_loop_end
           
-;          push b
-            lda mat_axx
-            mov e, a
-			mov d,b
-            call muls8s8shr7    ; d = a = d * e >> 7
-            sta rot_px
-;          pop b
-;          push b
-            lda mat_axy
-            mov d, a
-			mov e,c
-            call muls8s8shr7      ; d = a = d * e >> 7
-            lda rot_px
-            add d
-            sta rot_px            ; rot_px = Axx * px + Axy * py        =c5, 
-                                  ; but here -60 ($c4) * 126 ($7e) =-59 (c4*7e=$c5)
-                                  ; expected -57, got -56.. meh
-;          pop b  ; b = x, c = y
-;          push b
-;            push b
-              lda mat_ayx
-              mov e, a
-			  mov d,b
-              call muls8s8shr7          ; -3
-              sta rot_py
-;            pop b
-            lda mat_ayy
-            mov d, a
-	    mov e,c
-            call muls8s8shr7
-            lda rot_py
-            add d
-            sta rot_py          ; rot_py = Ayx * px + Ayy * py
-;          pop b
+          lda mat_axx
+          mov e, a
+          mov d,b
+          call muls8s8shr7    ; d = a = d * e >> 7
+          sta rot_px
+          lda mat_axy
+          mov d, a
+          mov e,c
+          call muls8s8shr7      ; d = a = d * e >> 7
+          lda rot_px
+          add d
+          sta rot_px            ; rot_px = Axx * px + Axy * py        =c5, 
+                                ; but here -60 ($c4) * 126 ($7e) =-59 (c4*7e=$c5)
+                                ; expected -57, got -56.. meh
+          lda mat_ayx
+          mov e, a
+          mov d,b
+          call muls8s8shr7          ; -3
+          sta rot_py
+          lda mat_ayy
+          mov d, a
+          mov e,c
+          call muls8s8shr7
+          lda rot_py
+          add d
+          sta rot_py          ; rot_py = Ayx * px + Ayy * py
           
-;          push b
-            lda mat_azx
-            mov e, a
-			mov d,b
-            call muls8s8shr7    ; =1
-            sta rot_pz
-;          pop b
+          lda mat_azx
+          mov e, a
+          mov d,b
+          call muls8s8shr7    ; =1
+          sta rot_pz
           lda mat_azy
           mov d, a
           mov e,c
@@ -1632,18 +1628,17 @@ rot_loop:
           call sincosa ; c = cos(2 * frame_no)
           ; calc cos / 4 (signed)
           xra a
-	  ora c
-;          jp $+5
-	  jp locm1
+          ora c
+          jp locm1
           cma \ inr a
           rar \ ora a \ rar
           cma \ inr a
-	  jmp locm2
-		  
+          jmp locm2
+                  
 locm1:
           rar \ ora a \ rar
-;		  inr c
-;		  dcr c		;test sign
+;          inr c
+;          dcr c         ;test sign
 ;          jp $+5
 ;          cma \ inr a   ; a = cos(2 * frame) / 4
 locm2:
@@ -1661,17 +1656,17 @@ locm2:
           ;mvi b, $b0
           
           
-;          push b
-            lda rot_px
-            mov e, a
-			mov d,b
-            call muls8u8shr7
-            adi $80     ; +128
-            sta rot_px  ; rot_px = x * zinv[z - ZINV_MIN] >> 7
-;          pop b
+;         push b
+          lda rot_px
+          mov e, a
+          mov d,b
+          call muls8u8shr7
+          adi $80     ; +128
+          sta rot_px  ; rot_px = x * zinv[z - ZINV_MIN] >> 7
+;         pop b
           lda rot_py
           mov e, a
-		  mov d,b
+          mov d,b
           call muls8u8shr7
           adi $80     ; +128
           sta rot_py    ; rot_py = y * zinv[z - ZINV_MIN] >> 7
@@ -1849,25 +1844,25 @@ rotmatrix:
 
         ; a = d = ((signed) e * (unsigned) d) >> 7
 muls8u8shr7:
-		xra a
-		sub e
+                xra a
+                sub e
         jm muls8u8shr7pos
 ;muls8u8shr7neg
         mov e, a
         call mul8
         ; a = de >> 7
-;		xchg
-;		dad h
-		xra a
-		sub d
+;       xchg
+;       dad h
+        xra a
+        sub d
         ret
 
 muls8u8shr7pos:
         call mul8
         ; a = de >> 7
-;		xchg
-;		dad h
-;        mov a, d
+;       xchg
+;       dad h
+;       mov a, d
         ret
 
 
@@ -1901,18 +1896,18 @@ muls8u8shr7pos:
         
 ;Умножение AHL=A*DE
 ;MulAHL_A_DE:
-;	mvi c,0
-;	mov h,d\ mov l,e
-;	add a\ jc xxMUL1
-;	add a\ jc xxMUL2+2
-;	add a\ jc xxMUL3+2
-;	add a\ jc xxMUL4+2
-;	add a\ jc xxMUL5+2
-;	add a\ jc xxMUL6+2
-;	add a\ jc xxMUL7+2
-;	add a\ rc
-;	lxi h,0
-;	ret
+;       mvi c,0
+;       mov h,d\ mov l,e
+;       add a\ jc xxMUL1
+;       add a\ jc xxMUL2+2
+;       add a\ jc xxMUL3+2
+;       add a\ jc xxMUL4+2
+;       add a\ jc xxMUL5+2
+;       add a\ jc xxMUL6+2
+;       add a\ jc xxMUL7+2
+;       add a\ rc
+;       lxi h,0
+;       ret
 ;
 ;xxMUL1: dad h\ adc a\ jnc xxMUL2+2
 ;xxMUL2: dad d\ adc c\ dad h\ adc a\ jnc xxMUL3+2
@@ -1922,61 +1917,61 @@ muls8u8shr7pos:
 ;xxMUL6: dad d\ adc c\ dad h\ adc a\ jnc xxMUL7+2
 ;xxMUL7: dad d\ adc c\ dad h\ adc a\ rnc
 ;xxMUL8: dad d\ adc c
-;	ret        
+;       ret        
 
         ; a=d = (d * e) >> 7 signed
 muls8s8shr7:
-		mov a,d
-		xra e
-		jm muls8s8shr7neg
+                mov a,d
+                xra e
+                jm muls8s8shr7neg
 ;muls8s8shr7pos
-		xra e
-		jp muls8s8shr7pos2
-		xra a
-		sub e
-		mov e,a
-		xra a
-		sub d
-		mov d,a
+                xra e
+                jp muls8s8shr7pos2
+                xra a
+                sub e
+                mov e,a
+                xra a
+                sub d
+                mov d,a
 muls8s8shr7pos2:
-		call mul8
-;		xchg
-;		dad h
-;		mov a,d
-		ret
-		
+                call mul8
+;               xchg
+;               dad h
+;               mov a,d
+                ret
+                
 muls8s8shr7neg:
-		xra e
-		jp muls8s8shr7neg1
-		xra a
-		sub d
-		mov d,a
+                xra e
+                jp muls8s8shr7neg1
+                xra a
+                sub d
+                mov d,a
 muls8s8shr7neg1:
-		xra a
-		sub e
-		jm muls8s8shr7neg2
-		mov e,a
+                xra a
+                sub e
+                jm muls8s8shr7neg2
+                mov e,a
 muls8s8shr7neg2:
-        call mul8
-;		xchg
-;		dad h
-		xra a
-;		sub h
-;		mov h,a
-		sub d
-		mov d,a
-        ret
+                call mul8
+;               xchg
+;               dad h
+                xra a
+;               sub h
+;               mov h,a
+                sub d
+                mov d,a
+                ret
 
-rotx:   .db 0
-roty:   .db 0
-rotz:   .db 0
+rotx:           .db 0
+roty:           .db 0
+rotz:           .db 0
 
-cos_a:  .db 0
-sin_a:  .db 0
-cos_b:  .db 0
-sin_b:  .db 0
-cos_c:  .db 0
-sin_c:  .db 0
+cos_a:          .db 0
+sin_a:          .db 0
+cos_b:          .db 0
+sin_b:          .db 0
+cos_c:          .db 0
+sin_c:          .db 0
 
 mat_axx:        .db      0
 mat_axy:        .db      0
@@ -1992,10 +1987,10 @@ cosa_x_sinb:    .db 0
 sina_x_sinb:    .db 0
 
 mathinit:
-	lxi b,-1
-	xra a
-	mov d, a
-	mov e, a
+        lxi b,-1
+        xra a
+        mov d, a
+        mov e, a
         lxi h, MULTAB
         call GenSQRtab
         inr h
@@ -2017,89 +2012,89 @@ sincosa:
         ; de = (d * e)<<1
         ; clobbers: everything
 mul8:
-	mov a, d
-	sub e			;A=D-E
-	mvi h, 1+(MULTAB>>8)
-	jnc m8_GetDif2
-	cma
-	inr a			;A=E-D
+        mov a, d
+        sub e                   ;A=D-E
+        mvi h, 1+(MULTAB>>8)
+        jnc m8_GetDif2
+        cma
+        inr a                   ;A=E-D
 ;m8_GetDif:
-	mov l, a
-	add d
-	add d			;A=E+D
-	mov d, m
-	dcr h
-	mov e, m
-	jnc m8_GetSum
-	mvi h, 2+(MULTAB>>8)
+        mov l, a
+        add d
+        add d                   ;A=E+D
+        mov d, m
+        dcr h
+        mov e, m
+        jnc m8_GetSum
+        mvi h, 2+(MULTAB>>8)
 m8_GetSum:
-	mov l, a
-	mov a, m
-	sub e
-	mov e, a
-	inr h
-	mov a, m
-	sbb d
-	mov d, a
-	ret
+        mov l, a
+        mov a, m
+        sub e
+        mov e, a
+        inr h
+        mov a, m
+        sbb d
+        mov d, a
+        ret
 
 m8_GetDif2:
-	mov l, a
-	mov d, m
-	dcr h
-	add e
-	add e			;A=D+E
-	mov e, m
-	jnc m8_GetSum2
-	mvi h, 2+(MULTAB>>8)
+        mov l, a
+        mov d, m
+        dcr h
+        add e
+        add e                   ;A=D+E
+        mov e, m
+        jnc m8_GetSum2
+        mvi h, 2+(MULTAB>>8)
 m8_GetSum2:
-	mov l, a
-	mov a, m
-	sub e
-	mov e, a
-	inr h
-	mov a, m
-	sbb d
-	mov d, a
-	ret
+        mov l, a
+        mov a, m
+        sub e
+        mov e, a
+        inr h
+        mov a, m
+        sbb d
+        mov d, a
+        ret
 
 
 GenSQRtab:
-	push d
-	push psw
-	rar
-	push psw
-	mov a, d
-	rar
-	mov d, a
-	mov a, e
-	rar
-	mov e, a
-	pop psw
-;	rar
-	mov a, d
-;	rar
-	inr h
-	mov m,a
-	dcr h
-	mov a, e
-;	rar
-	mov m, a
-	pop psw
-	pop d
-	inx b
-	inx b
-	xchg
-	dad b
-	xchg
-	aci 0
-	inr l
-	jnz GenSQRtab
-	ret
+        push d
+        push psw
+        rar
+        push psw
+        mov a, d
+        rar
+        mov d, a
+        mov a, e
+        rar
+        mov e, a
+        pop psw
+;       rar
+        mov a, d
+;       rar
+        inr h
+        mov m,a
+        dcr h
+        mov a, e
+;       rar
+        mov m, a
+        pop psw
+        pop d
+        inx b
+        inx b
+        xchg
+        dad b
+        xchg
+        aci 0
+        inr l
+        jnz GenSQRtab
+        ret
 
         .org 0100h + $ & 0ff00h  ; ALIGN 256
 zinvtbl:
-		.db $ff,$ff,$f8,$f1,$ea,$e3,$dd,$d7,$d2,$cd,$c8,$c3,$be,$ba,$b6,$b2,$ae,$aa,$a7,$a4,$a0,$9d,$9a,$97,$95,$92,$8f,$8d,$8b,$88,$86,$84,
+                .db $ff,$ff,$f8,$f1,$ea,$e3,$dd,$d7,$d2,$cd,$c8,$c3,$be,$ba,$b6,$b2,$ae,$aa,$a7,$a4,$a0,$9d,$9a,$97,$95,$92,$8f,$8d,$8b,$88,$86,$84,
         .db $82,$80,$7e,$7c,$7a,$78,$76,$75,$73,$72,$70,$6e,$6d,$6c,$6a,$69,$67,$66,$65,$64,$62,$61,$60,$5f,$5e,$5d,$5c,$5b,$5a,$59,$58,$57,
         .db $56,$55,$54,$53,$52,$52,$51,$50,$4f,$4f,$4e,$4d,$4c,$4c,$4b,$4a,$4a,$49,$48,$48,$47,$46,$46,$45,$45
 
@@ -2112,7 +2107,7 @@ bzinva:
 
         .org 0100h + $ & 0ff00h  ; ALIGN 256
 costbl:
-	.db $7f,$7f,$7f,$7f,$7e,$7e,$7e,$7d,$7d,$7c,$7b,$7a,$7a,$79,$78,$76,$75,$74,$73,$71,$70,$6f,$6d,$6b,$6a,$68,$66,$64,$62,$60,$5e,$5c
+        .db $7f,$7f,$7f,$7f,$7e,$7e,$7e,$7d,$7d,$7c,$7b,$7a,$7a,$79,$78,$76,$75,$74,$73,$71,$70,$6f,$6d,$6b,$6a,$68,$66,$64,$62,$60,$5e,$5c
         .db $5a,$58,$55,$53,$51,$4e,$4c,$49,$47,$44,$41,$3f,$3c,$39,$36,$33,$31,$2e,$2b,$28,$25,$22,$1f,$1c,$19,$16,$13,$10,$0c,$09,$06,$03
         .db $00,$fd,$fa,$f7,$f4,$f0,$ed,$ea,$e7,$e4,$e1,$de,$db,$d8,$d5,$d2,$cf,$cd,$ca,$c7,$c4,$c1,$bf,$bc,$b9,$b7,$b4,$b2,$af,$ad,$ab,$a8
         .db $a6,$a4,$a2,$a0,$9e,$9c,$9a,$98,$96,$95,$93,$91,$90,$8f,$8d,$8c,$8b,$8a,$88,$87,$86,$86,$85,$84,$83,$83,$82,$82,$82,$81,$81,$81
@@ -2264,7 +2259,7 @@ msg_restart:
 msg_minus1: .db "SVOFSKI & IVAGOR", 0
 
 
-        .org 020h + ($ & 0ffc0h)  ; ALIGN 32
+        .org 020h + ($ & 0ffe0h)  ; ALIGN 32
 zero_init_start:
 
 intcount:   .dw 0
@@ -2291,15 +2286,14 @@ slow_msg_loop:      .dw 0
 
 ; fish vars
 fish_wraparound_flag:   .db 0
-msgseq_end_flag:        .db 0
+;msgseq_end_flag:        .db 0
                 ; ORDER IMPORTANT
 fish_col_frac:    .db 0
 fish_col:         .db 0
-;shiftctr:        .db 0
 fish_enabled:     .db 0
 
 
-        .org 020h + ($ & 0ffc0h)  ; ALIGN 32
+        .org 020h + ($ & 0ffe0h)  ; ALIGN 32
 zero_init_end:
 
         ; big logo
@@ -2313,15 +2307,15 @@ fishz0: .ds 32   ; empty sprite for wiping
         .include "drawfish.inc"
 
         .org PLAYER_BASE-1
-	.db 0
+        .db 0
 
 player_init .equ PLAYER_BASE+0
 player_tick .equ PLAYER_BASE+3
 songe       .equ PLAYER_BASE+6
 
-	.end
-	
-	
+        .end
+        
+        
 ; code snippets cemetery
 
         ; xor-swap, register-saving but too slow
@@ -2346,4 +2340,4 @@ songe       .equ PLAYER_BASE+6
         ;                 ; $00 -> C=0, Z=1, P=1, S=0     ~ !state_a & !state_b
         ;                 ; $40 -> C=0, Z=0, P=0, S=1
         ;                 ; $C0 -> C=1, Z=0, P=0, S=1     ~ state_a & state_b
-	
+        
