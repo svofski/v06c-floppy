@@ -110,7 +110,7 @@
 0110   0190                     
 0111   0190 21 60 08            lxi h, $0860
 0112   0193 CD 9E 3E            call gotoxy
-0113   0196 21 E2 39            lxi h, msg_minus1
+0113   0196 21 E5 39            lxi h, msg_minus1
 0114   0199 CD C8 3E            call puts
 0115   019C             
 0116   019C 21 6F 09            lxi h, pal_intro
@@ -3343,105 +3343,104 @@
 2359   392B 20 20 00 
 2360   392E             
 2361   392E             
-2362   392E 42 04 13 00         .db TOPLINE - 80 - (LINEH*1), 4,  19, 0 ; stars
-2363   3932 50 14 11 00         .db TOPLINE - 80 - (LINEH*0), 20, 17, 0
-2364   3936 26 0A 12 00         .db TOPLINE - 80 - (LINEH*3), 10, 18, 0
-2365   393A E0 07 13 00         .db $e0, 7,                       19, 0
-2366   393E E6 10 12 00         .db $e6, 16,                      18, 0
-2367   3942 B8 1A 11 00         .db $b8, 26,                      17, 0
-2368   3946             
-2369   3946 34 00 20 20         .db TOPLINE - 80 - (LINEH*2), 0,  "      GREETINGS OUTLINE \\o/     ", 0
-2369   394A 20 20 20 20 
-2369   394E 47 52 45 45 
-2369   3952 54 49 4E 47 
-2369   3956 53 20 4F 55 
-2369   395A 54 4C 49 4E 
-2369   395E 45 20 5C 6F 
-2369   3962 2F 20 20 20 
-2369   3966 20 20 00 
-2370   3969             
-2371   3969 01 01 FD            .db 1, 1, 253
-2372   396C 01 01 FE            .db 1, 1, 254 ; launch fish
-2373   396F 01 01 FD            .db 1, 1, 253
-2374   3972 01 01 FD            .db 1, 1, 253
-2375   3975 01 01 FD            .db 1, 1, 253
-2376   3978 01 01 FD            .db 1, 1, 253
-2377   397B 01 01 FD            .db 1, 1, 253
-2378   397E 01 01 FD            .db 1, 1, 253
-2379   3981 01 01 FD            .db 1, 1, 253
-2380   3984             
-2381   3984 42 04 20 00         .db TOPLINE - 80 - (LINEH*1), 4,  " ", 0
-2382   3988 50 14 20 00         .db TOPLINE - 80 - (LINEH*0), 20,  " ", 0
-2383   398C 26 0A 20 00         .db TOPLINE - 80 - (LINEH*3), 10,  " ", 0
-2384   3990 E0 07 20 00         .db $e0, 7,  " ", 0
-2385   3994 E6 10 20 00         .db $e6, 16, " ", 0
-2386   3998 B8 1A 20 00         .db $b8, 26,  " ", 0
-2387   399C                     
-2388   399C                     ;.db TOPLINE - 80 - (LINEH*0), 0,  "                                ", 0
-2389   399C                     ;.db TOPLINE - 80 - (LINEH*0), 0,  "                                ", 0
-2390   399C                     ;.db TOPLINE - 80 - (LINEH*0), 0,  "                                ", 0
-2391   399C                     ;.db TOPLINE - 80 - (LINEH*1), 0,  "                                ", 0   ; wipe previous
-2392   399C                     ;.db TOPLINE - 80 - (LINEH*3), 0,  "                                ", 0
-2393   399C 34 00 20 20         .db TOPLINE - 80 - (LINEH*2), 0,  "                                ", 0
-2393   39A0 20 20 20 20 
-2393   39A4 20 20 20 20 
-2393   39A8 20 20 20 20 
-2393   39AC 20 20 20 20 
-2393   39B0 20 20 20 20 
-2393   39B4 20 20 20 20 
-2393   39B8 20 20 20 20 
-2393   39BC 20 20 00 
-2394   39BF             
-2395   39BF 01 01 FF            .db 1, 1, 255
-2396   39C2             
-2397   39C2                     .ds 32  ; there's a bug with alignment somewhere! (maybe not anymore)
-2398   39E2             
-2399   39E2 53 56 4F 46 msg_minus1: .db "SVOFSKI & IVAGOR", 0
-2399   39E6 53 4B 49 20 
-2399   39EA 26 20 49 56 
-2399   39EE 41 47 4F 52 
-2399   39F2 00 
-2400   39F3             
-2401   39F3             
-2402   3A00                     .org 020h + ($ & 0ffe0h)  ; ALIGN 32
-2403   3A00             zero_init_start:
-2404   3A00             
-2405   3A00 00 00       intcount:   .dw 0
-2406   3A02 00          frametime:  .db 0 ; interrupts between oneframe
-2407   3A03 00          frame_no:   .db 0
-2408   3A04 00          anim_pos:   .db 0
-2409   3A05             
-2410   3A05             pal_0:
-2411   3A05 00 00 00 00             .db 0, 0, 0, 0
-2412   3A09 00 00 00 00             .db 0, 0, 0, 0
-2413   3A0D 00 00 00 00             .db 0, 0, 0, 0
-2414   3A11 00 00 00 00             .db 0, 0, 0, 0
-2415   3A15 00 00       pal_a_ptr:  .dw 0
-2416   3A17 00 00       pal_b_ptr:  .dw 0
-2417   3A19             pal_fade_a: .ds 16
-2418   3A29             pal_fade_b: .ds 16
-2419   3A39             pal_zero_end:
-2420   3A39             
-2421   3A39 00          fade_in_flag:       .db 0
-2422   3A3A 00          slowprint_enabled:  .db 0
-2423   3A3B 00          slow_msg_state:     .db 0
-2424   3A3C 00 00       slow_msg_ptr:       .dw 0
-2425   3A3E 00 00       slow_msg_loop:      .dw 0
-2426   3A40             
-2427   3A40             ; fish vars
-2428   3A40             ;fish_wraparound_flag:   .db 0
-2429   3A40             ;msgseq_end_flag:        .db 0
-2430   3A40                             ; ORDER IMPORTANT
-2431   3A40 00          fish_col_frac:    .db 0
-2432   3A41 00          fish_col:         .db 0
-2433   3A42 00          fish_enabled:     .db 0
+2362   392E             
+2363   392E 34 00 20 20         .db TOPLINE - 80 - (LINEH*2), 0,  "      GREETINGS OUTLINE \\o/     ", 0
+2363   3932 20 20 20 20 
+2363   3936 47 52 45 45 
+2363   393A 54 49 4E 47 
+2363   393E 53 20 4F 55 
+2363   3942 54 4C 49 4E 
+2363   3946 45 20 5C 6F 
+2363   394A 2F 20 20 20 
+2363   394E 20 20 00 
+2364   3951 42 04 13 00         .db TOPLINE - 80 - (LINEH*1), 4,  19, 0 ; stars
+2365   3955 01 01 FE            .db 1, 1, 254 ; launch fish
+2366   3958 50 14 11 00         .db TOPLINE - 80 - (LINEH*0), 20, 17, 0 ; stars
+2367   395C 26 0A 12 00         .db TOPLINE - 80 - (LINEH*3), 10, 18, 0 ; stars
+2368   3960 01 01 FD            .db 1, 1, 253
+2369   3963 E0 07 13 00         .db $e0, 7,                       19, 0 ; stars
+2370   3967 01 01 FD            .db 1, 1, 253
+2371   396A E6 10 12 00         .db $e6, 16,                      18, 0 ; stars
+2372   396E 01 01 FD            .db 1, 1, 253
+2373   3971 E6 10 20 00         .db $e6, 16,                       " ", 0    ; wipe stars
+2374   3975 B8 1A 11 00         .db $b8, 26,                      17, 0 ; stars
+2375   3979 01 01 FD            .db 1, 1, 253
+2376   397C B8 1A 20 00         .db $b8, 26,                       " ", 0    ; wipe stars
+2377   3980 01 01 FD            .db 1, 1, 253
+2378   3983 42 04 20 00         .db TOPLINE - 80 - (LINEH*1), 4,   " ", 0    ; wipe stars
+2379   3987 E0 07 20 00         .db $e0, 7,                        " ", 0    ; wipe stars
+2380   398B 01 01 FD            .db 1, 1, 253
+2381   398E 50 14 20 00         .db TOPLINE - 80 - (LINEH*0), 20,  " ", 0    ; wipe stars
+2382   3992 01 01 FD            .db 1, 1, 253
+2383   3995 26 0A 20 00         .db TOPLINE - 80 - (LINEH*3), 10,  " ", 0    ; wipe stars
+2384   3999                     
+2385   3999                     ;.db TOPLINE - 80 - (LINEH*0), 0,  "                                ", 0
+2386   3999                     ;.db TOPLINE - 80 - (LINEH*0), 0,  "                                ", 0
+2387   3999                     ;.db TOPLINE - 80 - (LINEH*0), 0,  "                                ", 0
+2388   3999                     ;.db TOPLINE - 80 - (LINEH*1), 0,  "                                ", 0   ; wipe previous
+2389   3999                     ;.db TOPLINE - 80 - (LINEH*3), 0,  "                                ", 0
+2390   3999 34 00 20 20         .db TOPLINE - 80 - (LINEH*2), 0,  "                                ", 0
+2390   399D 20 20 20 20 
+2390   39A1 20 20 20 20 
+2390   39A5 20 20 20 20 
+2390   39A9 20 20 20 20 
+2390   39AD 20 20 20 20 
+2390   39B1 20 20 20 20 
+2390   39B5 20 20 20 20 
+2390   39B9 20 20 00 
+2391   39BC 01 01 FD            .db 1, 1, 253
+2392   39BF 01 01 FD            .db 1, 1, 253
+2393   39C2             
+2394   39C2 01 01 FF            .db 1, 1, 255
+2395   39C5             
+2396   39C5                     .ds 32  ; there's a bug with alignment somewhere! (maybe not anymore)
+2397   39E5             
+2398   39E5 53 56 4F 46 msg_minus1: .db "SVOFSKI & IVAGOR", 0
+2398   39E9 53 4B 49 20 
+2398   39ED 26 20 49 56 
+2398   39F1 41 47 4F 52 
+2398   39F5 00 
+2399   39F6             
+2400   39F6             
+2401   3A00                     .org 020h + ($ & 0ffe0h)  ; ALIGN 32
+2402   3A00             zero_init_start:
+2403   3A00             
+2404   3A00 00 00       intcount:   .dw 0
+2405   3A02 00          frametime:  .db 0 ; interrupts between oneframe
+2406   3A03 00          frame_no:   .db 0
+2407   3A04 00          anim_pos:   .db 0
+2408   3A05             
+2409   3A05             pal_0:
+2410   3A05 00 00 00 00             .db 0, 0, 0, 0
+2411   3A09 00 00 00 00             .db 0, 0, 0, 0
+2412   3A0D 00 00 00 00             .db 0, 0, 0, 0
+2413   3A11 00 00 00 00             .db 0, 0, 0, 0
+2414   3A15 00 00       pal_a_ptr:  .dw 0
+2415   3A17 00 00       pal_b_ptr:  .dw 0
+2416   3A19             pal_fade_a: .ds 16
+2417   3A29             pal_fade_b: .ds 16
+2418   3A39             pal_zero_end:
+2419   3A39             
+2420   3A39 00          fade_in_flag:       .db 0
+2421   3A3A 00          slowprint_enabled:  .db 0
+2422   3A3B 00          slow_msg_state:     .db 0
+2423   3A3C 00 00       slow_msg_ptr:       .dw 0
+2424   3A3E 00 00       slow_msg_loop:      .dw 0
+2425   3A40             
+2426   3A40             ; fish vars
+2427   3A40             ;fish_wraparound_flag:   .db 0
+2428   3A40             ;msgseq_end_flag:        .db 0
+2429   3A40                             ; ORDER IMPORTANT
+2430   3A40 00          fish_col_frac:    .db 0
+2431   3A41 00          fish_col:         .db 0
+2432   3A42 00          fish_enabled:     .db 0
+2433   3A43             
 2434   3A43             
-2435   3A43             
-2436   3A60                     .org 020h + ($ & 0ffe0h)  ; ALIGN 32
-2437   3A60             zero_init_end:
-2438   3A60             
-2439   3A60                     ; big logo
-2440   3A60                     .include "blksbr.inc"
+2435   3A60                     .org 020h + ($ & 0ffe0h)  ; ALIGN 32
+2436   3A60             zero_init_end:
+2437   3A60             
+2438   3A60                     ; big logo
+2439   3A60                     .include "blksbr.inc"
 0001+  3A60             ; Opened image graphics/blksbr.png 128x32
 0002+  3A60             ;                                                                                                                                  
 0003+  3A60             ;                                                                                                                                  
@@ -3780,9 +3779,9 @@
 0099+  3E98 18 50       .db 24, 80 
 0100+  3E9A 18 50       .db 24, 80 
 0101+  3E9C FF FF       .db 255, 255 ; end of plane data
-2441   3E9E             
-2442   3E9E                     ; big time textuality
-2443   3E9E                     .include "font8x8.inc"
+2440   3E9E             
+2441   3E9E                     ; big time textuality
+2442   3E9E                     .include "font8x8.inc"
 0001+  3E9E                 ; установить позицию для вывода следующего символа
 0002+  3E9E                 ; H = столбец, L = строка ($F8 = верхняя)
 0003+  3E9E             gotoxy:
@@ -4467,8 +4466,8 @@
 0300++ 4723             
 0301++ 4723             ; vim: filetype=asm
 0101+  4723             ; vim: filetype=asm
-2444   4723             
-2445   4723                     .include "fish.inc"
+2443   4723             
+2444   4723                     .include "fish.inc"
 0001+  4723             ; Opened image graphics/outline1.png 16x16
 0002+  4723             ;     212   222222 
 0003+  4723             ;     212  22111122
@@ -4539,8 +4538,8 @@
 0042+  4797 5E 9F 4D 21 
 0042+  479B 62 27 35 A9 
 0042+  479F 1E EB 00 3E 
-2446   47A3             fishz0: .ds 32   ; empty sprite for wiping
-2447   47C3                     .include "drawfish.inc"
+2445   47A3             fishz0: .ds 32   ; empty sprite for wiping
+2446   47C3                     .include "drawfish.inc"
 0001+  47C3             ;drawfish: 
 0002+  47C3             ;                lxi h, $d000 + FISH_Y
 0003+  47C3             ;                lxi d, fishb0
@@ -4980,40 +4979,40 @@
 0204+  4990 C9                          ret
 0205+  4991             
 0206+  4991             ; vim: filetype=asm
-2448   4991             
-2449   4FFF                     .org PLAYER_BASE-1
-2450   4FFF 00                  .db 0
-2451   5000             
-2452   5000             player_init .equ PLAYER_BASE+0
-2453   5000             player_tick .equ PLAYER_BASE+3
-2454   5000             songe       .equ PLAYER_BASE+6
-2455   5000             
-2456   5000                     .end
+2447   4991             
+2448   4FFF                     .org PLAYER_BASE-1
+2449   4FFF 00                  .db 0
+2450   5000             
+2451   5000             player_init .equ PLAYER_BASE+0
+2452   5000             player_tick .equ PLAYER_BASE+3
+2453   5000             songe       .equ PLAYER_BASE+6
+2454   5000             
+2455   5000                     .end
+2456   5000                     
 2457   5000                     
-2458   5000                     
-2459   5000             ; code snippets cemetery
-2460   5000             
-2461   5000                     ; xor-swap, register-saving but too slow
-2462   5000                     ; xra m           ; X = Y xor X  (X = *hl)
-2463   5000                     ; mov m, a
-2464   5000                     ; dcx h
-2465   5000                     ; xra m
-2466   5000                     ; mov m, a        ; Y = X xor Y 
-2467   5000                     ; inx h
-2468   5000                     ; xra m
-2469   5000                     ; mov m, a        ; = 64/swap
+2458   5000             ; code snippets cemetery
+2459   5000             
+2460   5000                     ; xor-swap, register-saving but too slow
+2461   5000                     ; xra m           ; X = Y xor X  (X = *hl)
+2462   5000                     ; mov m, a
+2463   5000                     ; dcx h
+2464   5000                     ; xra m
+2465   5000                     ; mov m, a        ; Y = X xor Y 
+2466   5000                     ; inx h
+2467   5000                     ; xra m
+2468   5000                     ; mov m, a        ; = 64/swap
+2469   5000                     
 2470   5000                     
-2471   5000                     
-2472   5000             
-2473   5000                     ; ora a           ; $00 -> Z=1                    -> continue
-2474   5000                     ;                 ; $80 -> Z=0, S=1, P=0          -> A (fill)
-2475   5000                     ;                 ; $C0 -> Z=0, S=1, P=1          -> continue
-2476   5000                     ;                 ; $40 -> Z=0, S=0, P=0          -> B (wipe)
-2477   5000             
-2478   5000                     ; add a           ; CY = state_a, S = state_b
-2479   5000                     ;                 ; $80 -> C=1, Z=1, P=1, S=0
-2480   5000                     ;                 ; $00 -> C=0, Z=1, P=1, S=0     ~ !state_a & !state_b
-2481   5000                     ;                 ; $40 -> C=0, Z=0, P=0, S=1
-2482   5000                     ;                 ; $C0 -> C=1, Z=0, P=0, S=1     ~ state_a & state_b
-2483   5000                     
+2471   5000             
+2472   5000                     ; ora a           ; $00 -> Z=1                    -> continue
+2473   5000                     ;                 ; $80 -> Z=0, S=1, P=0          -> A (fill)
+2474   5000                     ;                 ; $C0 -> Z=0, S=1, P=1          -> continue
+2475   5000                     ;                 ; $40 -> Z=0, S=0, P=0          -> B (wipe)
+2476   5000             
+2477   5000                     ; add a           ; CY = state_a, S = state_b
+2478   5000                     ;                 ; $80 -> C=1, Z=1, P=1, S=0
+2479   5000                     ;                 ; $00 -> C=0, Z=1, P=1, S=0     ~ !state_a & !state_b
+2480   5000                     ;                 ; $40 -> C=0, Z=0, P=0, S=1
+2481   5000                     ;                 ; $C0 -> C=1, Z=0, P=0, S=1     ~ state_a & state_b
+2482   5000                     
 tasm: Number of errors = 0

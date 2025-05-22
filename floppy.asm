@@ -2359,31 +2359,28 @@ msg_restart:
         .db TOPLINE - 80 - (LINEH*3), 0,  "                                ", 0
 
 
-        .db TOPLINE - 80 - (LINEH*1), 4,  19, 0 ; stars
-        .db TOPLINE - 80 - (LINEH*0), 20, 17, 0
-        .db TOPLINE - 80 - (LINEH*3), 10, 18, 0
-        .db $e0, 7,                       19, 0
-        .db $e6, 16,                      18, 0
-        .db $b8, 26,                      17, 0
 
         .db TOPLINE - 80 - (LINEH*2), 0,  "      GREETINGS OUTLINE \\o/     ", 0
-
-        .db 1, 1, 253
+        .db TOPLINE - 80 - (LINEH*1), 4,  19, 0 ; stars
         .db 1, 1, 254 ; launch fish
+        .db TOPLINE - 80 - (LINEH*0), 20, 17, 0 ; stars
+        .db TOPLINE - 80 - (LINEH*3), 10, 18, 0 ; stars
         .db 1, 1, 253
+        .db $e0, 7,                       19, 0 ; stars
         .db 1, 1, 253
+        .db $e6, 16,                      18, 0 ; stars
         .db 1, 1, 253
+        .db $e6, 16,                       " ", 0    ; wipe stars
+        .db $b8, 26,                      17, 0 ; stars
         .db 1, 1, 253
+        .db $b8, 26,                       " ", 0    ; wipe stars
         .db 1, 1, 253
+        .db TOPLINE - 80 - (LINEH*1), 4,   " ", 0    ; wipe stars
+        .db $e0, 7,                        " ", 0    ; wipe stars
         .db 1, 1, 253
+        .db TOPLINE - 80 - (LINEH*0), 20,  " ", 0    ; wipe stars
         .db 1, 1, 253
-
-        .db TOPLINE - 80 - (LINEH*1), 4,  " ", 0
-        .db TOPLINE - 80 - (LINEH*0), 20,  " ", 0
-        .db TOPLINE - 80 - (LINEH*3), 10,  " ", 0
-        .db $e0, 7,  " ", 0
-        .db $e6, 16, " ", 0
-        .db $b8, 26,  " ", 0
+        .db TOPLINE - 80 - (LINEH*3), 10,  " ", 0    ; wipe stars
         
         ;.db TOPLINE - 80 - (LINEH*0), 0,  "                                ", 0
         ;.db TOPLINE - 80 - (LINEH*0), 0,  "                                ", 0
@@ -2391,6 +2388,8 @@ msg_restart:
         ;.db TOPLINE - 80 - (LINEH*1), 0,  "                                ", 0   ; wipe previous
         ;.db TOPLINE - 80 - (LINEH*3), 0,  "                                ", 0
         .db TOPLINE - 80 - (LINEH*2), 0,  "                                ", 0
+        .db 1, 1, 253
+        .db 1, 1, 253
 
         .db 1, 1, 255
 
