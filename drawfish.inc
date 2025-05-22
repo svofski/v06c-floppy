@@ -8,8 +8,8 @@
 ;                ret
 
 maybe_wipe_fish:
-                mvi a, $ff
-                sta fish_wraparound_flag
+                ;mvi a, $ff
+                ;sta fish_wraparound_flag
                 ;lda msgseq_end_flag
                 ;ora a
                 ;rz
@@ -34,8 +34,10 @@ mwf_l1:
                 mvi l, FISH_Y
                 dcr b
                 jnz mwf_l2
+
+                jmp fade_to_blue 
               
-                ret
+                ;ret
 
 drawfish_a:
                 mov a, m

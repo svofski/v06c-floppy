@@ -8,6 +8,7 @@
 
 ;#define FADE_IN
 #define FADE_OUT
+#define XFADE
 
 ; show all the text messages before the main screen appears
 ;#define MESSAGES_AT_ONCE
@@ -178,6 +179,11 @@ messages_done:
         ; MAIN PART BEGINS
 
         ; begin fade in -- make sure these pointers are initialised before oneframe()
+        lxi h, pal_a        ; main palette a/b (blue)
+        shld pal_a_goal
+        lxi h, pal_b
+        shld pal_b_goal
+
         lxi h, pal_fade_a
         shld pal_a_ptr
         lxi h, pal_fade_b
@@ -1290,6 +1296,9 @@ BLKC    .equ 232q
 WHTC    .equ 377q    
 XXXC    .equ 110q
 
+; atari green
+ATRG    .equ 161q
+
 ;;;; semi-transparent
 ;WHTCt    .equ 377q-011q
 ;
@@ -1300,6 +1309,7 @@ XXXC    .equ 110q
 ;    .db  BLKC,BLKC,CLRB,CLRB,WHTC,WHTC,WHTCt,WHTCt,XXXC,XXXC,XXXC,XXXC,XXXC,XXXC,XXXC,BLKC
 ;;;;
 
+; main palette (goal)
 pal_a: ; $e0  
     ;    0    1    2    3    4    5    6    7    8    9    a    b    c    d    e    f
     .db  BLKC,CLRA,BLKC,CLRA,WHTC,WHTC,WHTC,WHTC,XXXC,XXXC,XXXC,XXXC,XXXC,XXXC,XXXC,BLKC
@@ -1309,25 +1319,120 @@ pal_intro:
     ;    0    1    2    3    4    5    6    7    8    9    a    b    c    d    e    f
     .db  0,0,0,0,WHTC,WHTC,WHTC,WHTC,0,0,0,0,0,0,0,0
 
+; green palette (goal)
+pal_atari_a: ; $e0  
+    ;    0    1    2    3    4    5    6    7    8    9    a    b    c    d    e    f
+    .db  ATRG,CLRA,ATRG,CLRA,WHTC,WHTC,WHTC,WHTC,XXXC,XXXC,XXXC,XXXC,XXXC,XXXC,XXXC,ATRG
+pal_atari_b: ; $c0    
+    .db  ATRG,ATRG,CLRB,CLRB,WHTC,WHTC,WHTC,WHTC,XXXC,XXXC,XXXC,XXXC,XXXC,XXXC,XXXC,ATRG
+
 do_fade_in:
         lda fade_in_flag
         dcr a
         sta fade_in_flag
+pal_a_goal .equ $+1
         lxi d, pal_a        ; goal
         lxi h, pal_fade_a   ; work
-#ifdef FADE_IN
-        call fade_in
+#ifdef XFADE
+        call xfade
 #else
+  #ifdef FADE_IN
+        call fade_in
+  #else
         call fade_out
+  #endif
 #endif
+pal_b_goal .equ $+1
         lxi d, pal_b        ; goal
         lxi h, pal_fade_b   ; work
-#ifdef FADE_IN
-        call fade_in
+#ifdef XFADE
+        call xfade
 #else
+  #ifdef FADE_IN
+        call fade_in
+  #else
         call fade_out
+  #endif
 #endif
         ret
+
+#ifdef XFADE
+xfade:
+        mvi c, 16
+xfade_loop:
+        ldax d
+
+        push b
+          push d
+            mov d, a
+            mov e, m
+            call xfade_bgr
+            mov m, e
+          pop d
+        pop b
+        inx h
+        inx d
+        dcr c
+        jnz xfade_loop
+        ret
+
+        ; fade e towards d
+xfade_bgr:
+        mov a, d
+        ani 300q
+        mov b, a        ; b = goal & 0200
+        mov a, e
+        ani 300q        ; a = work & 0200
+        cmp b
+        jz xfade_green
+        mov a, e        ; a = work
+        jc xfade_blue_plus
+xfade_blue_minus:
+        sui 100q
+        jmp xfade_blue_done
+xfade_blue_plus:
+        adi 100q
+xfade_blue_done:
+        mov e, a
+        
+xfade_green:
+        mov a, d
+        ani 070q
+        mov b, a        ; b = goal & 0030
+        mov a, e
+        ani 070q
+        cmp b
+        jz xfade_red
+        mov a, e
+        jc xfade_green_plus
+xfade_green_minus:
+        sui 010q
+        jmp xfade_green_done
+xfade_green_plus:
+        adi 010q
+xfade_green_done:
+        mov e, a
+        
+xfade_red:
+        mov a, d
+        ani 7
+        mov b, a        ; b = goal & 3
+        mov a, e
+        ani 7
+        cmp b
+        rz
+        mov a, e        ; 
+        jc xfade_red_plus
+xfade_red_minus:
+        sui 1
+        mov e, a
+        ret
+xfade_red_plus
+        adi 1
+        mov e, a
+        ret
+
+#else
 
 #ifdef FADE_IN
         ; de=goal, hl=work (start with zeroes)
@@ -1406,6 +1511,8 @@ fade_out_loop:
         ret
 #endif
 
+#endif ; XFADE
+
 slowprint:
         lhld slow_msg_ptr
         lda slow_msg_state
@@ -1457,12 +1564,28 @@ launch_fish:
         mvi a, 1
         sta fish_col_frac
         sta fish_enabled
+
+fade_to_green:
+        ; xfade into green
+        ; begin fade in -- make sure these pointers are initialised before oneframe()
+        lxi h, pal_atari_a
+        shld pal_a_goal
+        lxi h, pal_atari_b
+        shld pal_b_goal
+fade_start_fade:
+        mvi a, 8
+        sta fade_in_flag    ; enable fade in for 8 frames (see ISR)
         ret
+fade_to_blue:               ; jumped from maybe_wipe_fish
+        lxi h, pal_a
+        shld pal_a_goal
+        lxi h, pal_b
+        shld pal_b_goal
+        jmp fade_start_fade
 delay_line:
         mvi a, 33
         sta slow_msg_state
         ret
-
 
 
 ISRstack:
@@ -2174,7 +2297,7 @@ msg_restart:
         .db TOPLINE - 80 + (LINEH*1), 0,  "                                ", 0
 
 
-        .db TOPLINE -  0, 4, "  KAPTOTEKA BEKTOPA-06",20,"  ", 0
+        .db TOPLINE -  0, 4, " KAPTOTEKA  BEKTOPA-06",20,"  ", 0
 
         .db TOPLINE - 80, 0,              "    WRITE MASSIVE TUNES  FOR    ", 0
         .db TOPLINE - 80 - (LINEH*1), 0,  "          THE AMAZING           ", 0
@@ -2235,7 +2358,16 @@ msg_restart:
         .db TOPLINE - 80 - (LINEH*2), 0,  "                                ", 0
         .db TOPLINE - 80 - (LINEH*3), 0,  "                                ", 0
 
+
+        .db TOPLINE - 80 - (LINEH*1), 4,  19, 0 ; stars
+        .db TOPLINE - 80 - (LINEH*0), 20, 17, 0
+        .db TOPLINE - 80 - (LINEH*3), 10, 18, 0
+        .db $e0, 7,                       19, 0
+        .db $e6, 16,                      18, 0
+        .db $b8, 26,                      17, 0
+
         .db TOPLINE - 80 - (LINEH*2), 0,  "      GREETINGS OUTLINE \\o/     ", 0
+
         .db 1, 1, 253
         .db 1, 1, 254 ; launch fish
         .db 1, 1, 253
@@ -2244,6 +2376,14 @@ msg_restart:
         .db 1, 1, 253
         .db 1, 1, 253
         .db 1, 1, 253
+        .db 1, 1, 253
+
+        .db TOPLINE - 80 - (LINEH*1), 4,  " ", 0
+        .db TOPLINE - 80 - (LINEH*0), 20,  " ", 0
+        .db TOPLINE - 80 - (LINEH*3), 10,  " ", 0
+        .db $e0, 7,  " ", 0
+        .db $e6, 16, " ", 0
+        .db $b8, 26,  " ", 0
         
         ;.db TOPLINE - 80 - (LINEH*0), 0,  "                                ", 0
         ;.db TOPLINE - 80 - (LINEH*0), 0,  "                                ", 0
@@ -2254,7 +2394,7 @@ msg_restart:
 
         .db 1, 1, 255
 
-        .ds 32  ; there's a bug with alignment somewhere!
+        .ds 32  ; there's a bug with alignment somewhere! (maybe not anymore)
 
 msg_minus1: .db "SVOFSKI & IVAGOR", 0
 
@@ -2285,7 +2425,7 @@ slow_msg_ptr:       .dw 0
 slow_msg_loop:      .dw 0
 
 ; fish vars
-fish_wraparound_flag:   .db 0
+;fish_wraparound_flag:   .db 0
 ;msgseq_end_flag:        .db 0
                 ; ORDER IMPORTANT
 fish_col_frac:    .db 0
