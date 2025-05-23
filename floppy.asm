@@ -30,18 +30,21 @@ DEG90           .equ 256/4
         di
         xra a
         out $10
-        lxi sp, $100
-        mvi a, $c9
-        sta $38
-
-        mvi a, $c3
-        sta 0
         lxi h, $100
         shld 1
+        sphl
+;        mvi a, $c9
+;        sta $38
+
+        lxi h,ISR
+        shld 39h
+        mvi a, $c3
+        sta 0
+        sta 38h
         
         lxi h, pal_0
         shld setpal_select
-        ei
+;        ei
 
         ; clear zero initialized vars
         lxi h, zero_init_end
@@ -73,11 +76,7 @@ DEG90           .equ 256/4
         call player_init    ; starts playback immediately
 
         call clrscr
-        di
-        mvi a,0C3h
-        sta 38h
-        lxi h,ISR
-        shld 39h
+;        di
         ei
 
         lxi h, PixTabA
@@ -87,9 +86,6 @@ DEG90           .equ 256/4
         mvi a, BUTTPLANE_B
         call MakePixTab
                 
-        mvi a, 1
-        out $2
-
         call mathinit
 
         ; clear all bounds arrays
@@ -100,6 +96,7 @@ DEG90           .equ 256/4
 
         lxi h, pal_zero_end
         mvi a, 1
+        out $2
 #ifdef FADE_IN        
         lxi b, 0
 #else
@@ -1327,9 +1324,8 @@ pal_atari_b: ; $c0
     .db  ATRG,ATRG,CLRB,CLRB,WHTC,WHTC,WHTC,WHTC,XXXC,XXXC,XXXC,XXXC,XXXC,XXXC,XXXC,ATRG
 
 do_fade_in:
-        lda fade_in_flag
-        dcr a
-        sta fade_in_flag
+		lxi h,fade_in_flag
+		dcr m
 pal_a_goal .equ $+1
         lxi d, pal_a        ; goal
         lxi h, pal_fade_a   ; work
@@ -1378,58 +1374,47 @@ xfade_loop:
 
         ; fade e towards d
 xfade_bgr:
-        mov a, d
-        ani 300q
+		mvi a,300q
+		ana d
         mov b, a        ; b = goal & 0200
-        mov a, e
-        ani 300q        ; a = work & 0200
+		mvi a,300q
+		ana e			; a = work & 0200
         cmp b
         jz xfade_green
-        mov a, e        ; a = work
+		mvi a,100q
         jc xfade_blue_plus
-xfade_blue_minus:
-        sui 100q
-        jmp xfade_blue_done
+		mvi a,-100q
 xfade_blue_plus:
-        adi 100q
-xfade_blue_done:
+		add e
         mov e, a
         
 xfade_green:
-        mov a, d
-        ani 070q
+		mvi a,070q
+		ana d
         mov b, a        ; b = goal & 0030
-        mov a, e
-        ani 070q
+		mvi a,070q
+		ana e
         cmp b
         jz xfade_red
-        mov a, e
+		mvi a,010q
         jc xfade_green_plus
-xfade_green_minus:
-        sui 010q
-        jmp xfade_green_done
+		mvi a,-010q
 xfade_green_plus:
-        adi 010q
-xfade_green_done:
+        add e
         mov e, a
         
 xfade_red:
-        mov a, d
-        ani 7
+		mvi a,7
+		ana d
         mov b, a        ; b = goal & 3
-        mov a, e
-        ani 7
+		mvi a,7
+		ana e
         cmp b
         rz
-        mov a, e        ; 
-        jc xfade_red_plus
-xfade_red_minus:
-        sui 1
-        mov e, a
-        ret
-xfade_red_plus
-        adi 1
-        mov e, a
+		inr e
+        rc
+		dcr e
+		dcr e
         ret
 
 #else
@@ -1484,21 +1469,19 @@ fade_out_loop:
         sub m           ; work - goal
         mov d, a
         mvi b, 0
-        ani 007q
+        ani 300q
         jz $+5
-        mvi b, 001q
-        mov a, d
-        ani 070q
+		mvi b,100q
+		mvi a,070q
+		ana d
         jz $+7
         mvi a, 010q
         ora b
         mov b, a
-        mov a, d
-        ani 300q
-        jz $+7
-        mvi a, 100q
-        ora b
-        mov b, a
+		mvi a,007q
+		ana d
+        jz $+4
+		inr b
         pop d
 
         ldax d
@@ -2042,49 +2025,6 @@ muls8u8shr7pos:
 ;xxMUL8: dad d\ adc c
 ;       ret        
 
-        ; a=d = (d * e) >> 7 signed
-muls8s8shr7:
-                mov a,d
-                xra e
-                jm muls8s8shr7neg
-;muls8s8shr7pos
-                xra e
-                jp muls8s8shr7pos2
-                xra a
-                sub e
-                mov e,a
-                xra a
-                sub d
-                mov d,a
-muls8s8shr7pos2:
-                call mul8
-;               xchg
-;               dad h
-;               mov a,d
-                ret
-                
-muls8s8shr7neg:
-                xra e
-                jp muls8s8shr7neg1
-                xra a
-                sub d
-                mov d,a
-muls8s8shr7neg1:
-                xra a
-                sub e
-                jm muls8s8shr7neg2
-                mov e,a
-muls8s8shr7neg2:
-                call mul8
-;               xchg
-;               dad h
-                xra a
-;               sub h
-;               mov h,a
-                sub d
-                mov d,a
-                ret
-
 rotx:           .db 0
 roty:           .db 0
 rotz:           .db 0
@@ -2131,6 +2071,41 @@ sincosa:
         mov b, m        ; b = sin
         ret
      
+
+        ; a=d = (d * e) >> 7 signed
+muls8s8shr7:
+                mov a,d
+                xra e
+                jp muls8s8shr7pos
+muls8s8shr7neg:
+                xra e
+                jp muls8s8shr7neg1
+                xra a
+                sub d
+                mov d,a
+muls8s8shr7neg1:
+                xra a
+                sub e
+                jm muls8s8shr7neg2
+                mov e,a
+muls8s8shr7neg2:
+                call mul8
+                xra a
+                sub d
+                mov d,a
+                ret
+
+muls8s8shr7pos
+                xra e
+                jp muls8s8shr7pos2
+                xra a
+                sub e
+                mov e,a
+                xra a
+                sub d
+                mov d,a
+muls8s8shr7pos2:
+
         ; from raytracing8080_vXsource/mul8bit.asm
         ; de = (d * e)<<1
         ; clobbers: everything
@@ -2351,7 +2326,7 @@ msg_restart:
         ;.db TOPLINE - 80 - (LINEH*4), 0,  "                                ", 0
         .db 1, 1, 253
 
-        .db TOPLINE -  0, 4, "  KPOTOTEKA", 0
+        .db TOPLINE -  0, 4, " KPOTOTEKA ", 0
 
         .db TOPLINE - 80 - (LINEH*0), 0,  "                                ", 0
         .db TOPLINE - 80 - (LINEH*1), 0,  "                                ", 0   ; wipe previous

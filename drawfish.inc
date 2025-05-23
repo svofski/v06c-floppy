@@ -46,19 +46,8 @@ drawfish_a:
                 ;rp
 
                 lxi d, fisha0
-                mvi a, FISH_BP
-                add m
-                inr a
-                mov h, a
-                mvi l, FISH_Y
-                push h
-                call drawspr
-                pop h
-                mvi a, $20
-                add h
-                mov h, a
-                lxi d, fisha1
-                jmp drawspr
+                lxi b, fisha1
+                jmp drawfish_b2
 
 drawfish_b:
                 mov a, m
@@ -66,6 +55,8 @@ drawfish_b:
                 jp maybe_wipe_fish
 
                 lxi d, fishb0
+                lxi b, fishb1
+drawfish_b2:
                 mvi a, FISH_BP
                 add m
                 inr a
@@ -77,12 +68,11 @@ drawfish_b:
                 mvi a, $20
                 add h
                 mov h, a
-                lxi d, fishb1
-                jmp drawspr
+				mov e,c
+				mov d,b
                 
 drawspr:
-                mvi c, 2
-drawspr_l1
+				call $+3
                 ldax d \ mov m, a \ inx d \ inr h
                 ldax d \ mov m, a \ inx d \ dcr h \ dcr l
                 ldax d \ mov m, a \ inx d \ inr h
@@ -99,10 +89,6 @@ drawspr_l1
                 ldax d \ mov m, a \ inx d \ dcr h \ dcr l
                 ldax d \ mov m, a \ inx d \ inr h
                 ldax d \ mov m, a \ inx d \ dcr h \ dcr l
-
-                dcr c
-                jnz drawspr_l1
-
                 ret
                 
                 ; fish swimming
@@ -120,17 +106,12 @@ dumbshift:
                 adi FISH_BP;$c0
                 mov h, a
 
-                mvi a, FISH_Y
-                mov l, a \ mov e, a \ mov c, a
                 call oneshift
 
-                lda fish_col
-                adi (FISH_BP + $20)
-                mov b, a \ inr a \ ani $1f \ adi (FISH_BP + $20) \ mov d, a
-                           inr a \ ani $1f \ adi (FISH_BP + $20) \ mov h, a
+				mvi a,20h\ add h\ mov h,a
+				mvi a,20h\ add d\ mov d,a
+				mvi a,20h\ add b\ mov b,a
 
-                mvi a, FISH_Y
-                mov l, a \ mov e, a \ mov c, a
                 call oneshift
 
                 lxi h, fish_col_frac
@@ -152,54 +133,56 @@ dumbshift:
                 ;ret
 
 oneshift:
-                ora a \ mov a, m \ ral \ mov m, a 
+                mvi l, FISH_Y \ mov e, l \ mov c, l
+
+                mov a, m \ add a \ mov m, a 
                            ldax d \ ral \ stax d
                            ldax b \ ral \ stax b \ dcr l \ dcr e \ dcr c
-                ora a \ mov a, m \ ral \ mov m, a 
+                mov a, m \ add a \ mov m, a 
                            ldax d \ ral \ stax d
                            ldax b \ ral \ stax b \ dcr l \ dcr e \ dcr c
-                ora a \ mov a, m \ ral \ mov m, a 
+                mov a, m \ add a \ mov m, a 
                            ldax d \ ral \ stax d
                            ldax b \ ral \ stax b \ dcr l \ dcr e \ dcr c
-                ora a \ mov a, m \ ral \ mov m, a 
+                mov a, m \ add a \ mov m, a 
                            ldax d \ ral \ stax d
                            ldax b \ ral \ stax b \ dcr l \ dcr e \ dcr c
-                ora a \ mov a, m \ ral \ mov m, a 
+                mov a, m \ add a \ mov m, a 
                            ldax d \ ral \ stax d
                            ldax b \ ral \ stax b \ dcr l \ dcr e \ dcr c
-                ora a \ mov a, m \ ral \ mov m, a 
+                mov a, m \ add a \ mov m, a 
                            ldax d \ ral \ stax d
                            ldax b \ ral \ stax b \ dcr l \ dcr e \ dcr c
-                ora a \ mov a, m \ ral \ mov m, a 
+                mov a, m \ add a \ mov m, a 
                            ldax d \ ral \ stax d
                            ldax b \ ral \ stax b \ dcr l \ dcr e \ dcr c
-                ora a \ mov a, m \ ral \ mov m, a 
+                mov a, m \ add a \ mov m, a 
                            ldax d \ ral \ stax d
                            ldax b \ ral \ stax b \ dcr l \ dcr e \ dcr c
-                ora a \ mov a, m \ ral \ mov m, a 
+                mov a, m \ add a \ mov m, a 
                            ldax d \ ral \ stax d
                            ldax b \ ral \ stax b \ dcr l \ dcr e \ dcr c
-                ora a \ mov a, m \ ral \ mov m, a 
+                mov a, m \ add a \ mov m, a 
                            ldax d \ ral \ stax d
                            ldax b \ ral \ stax b \ dcr l \ dcr e \ dcr c
-                ora a \ mov a, m \ ral \ mov m, a 
+                mov a, m \ add a \ mov m, a 
                            ldax d \ ral \ stax d
                            ldax b \ ral \ stax b \ dcr l \ dcr e \ dcr c
-                ora a \ mov a, m \ ral \ mov m, a 
+                mov a, m \ add a \ mov m, a 
                            ldax d \ ral \ stax d
                            ldax b \ ral \ stax b \ dcr l \ dcr e \ dcr c
-                ora a \ mov a, m \ ral \ mov m, a 
+                mov a, m \ add a \ mov m, a 
                            ldax d \ ral \ stax d
                            ldax b \ ral \ stax b \ dcr l \ dcr e \ dcr c
-                ora a \ mov a, m \ ral \ mov m, a 
+                mov a, m \ add a \ mov m, a 
                            ldax d \ ral \ stax d
                            ldax b \ ral \ stax b \ dcr l \ dcr e \ dcr c
-                ora a \ mov a, m \ ral \ mov m, a 
+                mov a, m \ add a \ mov m, a 
                            ldax d \ ral \ stax d
                            ldax b \ ral \ stax b \ dcr l \ dcr e \ dcr c
-                ora a \ mov a, m \ ral \ mov m, a 
+                mov a, m \ add a \ mov m, a 
                            ldax d \ ral \ stax d
-                           ldax b \ ral \ stax b \ dcr l \ dcr e \ dcr c
+                           ldax b \ ral \ stax b ; \ dcr l \ dcr e \ dcr c
                 
                 ret
 
