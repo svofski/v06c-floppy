@@ -77,3 +77,6 @@ cp blksbr.nfo release/
 cp floppy.rom release/blksbr.rom
 cp floppy.wav release/blksbr.wav
 cp floppy-turbo.wav release/blksbr-turbo.wav
+cd release
+zip -r ../v06c-blksbr.zip ./*
+zip ../v06c-blksbr.zip -z<../zipfile-comment.txt
